@@ -2,7 +2,7 @@
 import json
 from pymongo import MongoClient
 import os
-from pprint import pprint
+from timeit import default_timer as timer
 
 """
 The following code assumes that the data is stored in the same directory load_data.py. 
