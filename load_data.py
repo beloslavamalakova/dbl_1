@@ -53,8 +53,7 @@ database either does not exist yet or is empty at the start to avoid duplication
 The counter is simply a visual to check how many json files have been inserted up to that point. 
 There are a total of 567 airlines files, so the counter should run until 567 once it is finished. 
 
-Furthermore, the timer measures the total time (in sec) it took to load the data. The average
-loading time is just above 1 hour. 
+Furthermore, the timer measures the total time (in sec) it took to load the data. 
 
 The error dictionary shows the amount of documents in a respective json file that were erroneous
 and thus could not be loaded into the database. 
