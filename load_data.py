@@ -60,9 +60,6 @@ and thus could not be loaded into the database.
 
 After loading all the data, make sure to comment the code again, since loading the data into 
 the database is a one-time procedure. 
-
-Testing
-
 """
 
 # # Uncomment this block of code and then run the file once!
