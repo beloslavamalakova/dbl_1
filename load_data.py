@@ -48,7 +48,8 @@ def load_data():
 
 """
 Uncomment the code below in order to load the data. Make sure that the 
-database either does not exist yet or is empty at the start to avoid duplication errors. 
+database either does not exist yet or is empty at the start to avoid duplication errors. In case 
+one is not able to load all the data in one run, drop the database and restart. 
 
 The counter is simply a visual to check how many json files have been inserted up to that point. 
 There are a total of 567 airlines files, so the counter should run until 567 once it is finished. 
@@ -66,7 +67,7 @@ the database is a one-time procedure.
 # start = timer()
 # load_data()
 # end = timer()
-#
+# 
 # print(end - start)
 # print(error)
 
