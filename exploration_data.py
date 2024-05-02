@@ -44,7 +44,7 @@ print(nl_tweets_count) # result: 206641
 
 # number of undefined language tweets
 und_tweets_count = db.tweets_all.count_documents("lang":"und")
-print(und_tweets_count)
+print(und_tweets_count) # result:
 
 # close connection
 client.close()
