@@ -7,7 +7,8 @@ from timeit import default_timer as timer
 """
 The following code assumes that the data is stored in the same directory load_data.py. 
 That is, a folder called "data" is stored in the same directory as the the current file and 
-"data" contains all the json airlines files. 
+"data" contains all the json airlines files. Again, the "data" folder should contain ONLY 
+the json airlines files. 
 """
 
 # establish connection to MongoDB
