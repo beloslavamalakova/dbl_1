@@ -6,8 +6,11 @@ from datetime import datetime
 # establish connection to MongoDB
 client = MongoClient()
 
+# database and collection
 db = client["airlines"]
 tweets_all = db["tweets_all"]
+
+# note that this is as performed on the RAW data, which may well contain duplicates etc.
 
 # total number of tweets
 tweets_count = db.tweets_all.count_documents({})
@@ -51,6 +54,8 @@ print(und_tweets_count) # result: 190928
 # number of deleted tweets
 deleted_tweets_count = db.tweets_all.distinct("delete")
 print(len(deleted_tweets_count))  # result: 2180
+
+
 
 
 # close connection
