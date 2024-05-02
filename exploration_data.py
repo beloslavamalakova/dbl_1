@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 from pprint import pprint
+from datetime import datetime
+
 
 # establish connection to MongoDB
 client = MongoClient()
@@ -43,8 +45,13 @@ nl_tweets_count = db.tweets_all.count_documents({"lang":"nl"})
 print(nl_tweets_count) # result: 206641
 
 # number of undefined language tweets
-und_tweets_count = db.tweets_all.count_documents("lang":"und")
-print(und_tweets_count) # result:
+und_tweets_count = db.tweets_all.count_documents({"lang": "und"})
+print(und_tweets_count) # result: 190928
+
+# number of deleted tweets
+deleted_tweets_count = db.tweets_all.distinct("delete")
+print(len(deleted_tweets_count))  # result: 2180
+
 
 # close connection
 client.close()
