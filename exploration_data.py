@@ -58,6 +58,26 @@ deleted_tweets_count = db.tweets_all.distinct("delete")
 print(len(deleted_tweets_count))  # result: 2180
 
 
+# finds the amount of tweets send per day || FUNCTION TAKES TOO LONG!!!
+date_dict = {}
+for tweet in tweets_all.find():
+    try:
+        date_string = tweet["created_at"]
+        date_object = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+        date = (date_object.year, date_object.month, date_object.day)
+
+        if date not in date_dict:
+            date_dict[date] = 1
+        else:
+            date_dict[date] += 1
+    except:
+        continue
+
+# prints full dictionary
+print(date_dict)
+
+# prints the date with the least amount of tweets (first day of the dataset)
+print(min(date_dict.keys()))
 
 
 # close connection
