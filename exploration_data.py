@@ -10,6 +10,8 @@ client = MongoClient()
 db = client["airlines"]
 tweets_all = db["tweets_all"]
 
+
+
 # note that this is as performed on the RAW data, which may well contain duplicates etc.
 
 # total number of tweets
