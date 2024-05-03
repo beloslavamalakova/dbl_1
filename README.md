@@ -5,6 +5,8 @@ In order to run the code, the following packages need to be installed:
 - json 
 - pymongo 4.7.0
 - os 
+- datetime
+- timeit
 
 ## Python Files
 

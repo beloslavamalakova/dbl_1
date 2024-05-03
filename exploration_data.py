@@ -11,17 +11,15 @@ db = client["airlines"]
 tweets_all = db["tweets_all"]
 
 
-
 # note that this is as performed on the RAW data, which may well contain duplicates etc.
 
 # total number of tweets
 tweets_count = db.tweets_all.count_documents({})
 print(tweets_count) # result: 6511146
 
-# number of tweets with replies
+# number of tweets with replies || ALL DOCS HAVE REPLY_COUNT = 0 
 reply_count = db.tweets_all.count_documents({"reply_count":{"gt":0}})
 print(reply_count) # result: 0
-# PROBLEM !!!! ALL TWEETS HAVE NON_REPLY_COUNT = 0
 
 # number of tweets that are replies ...
 # ... based on in_reply_to_status_id_str

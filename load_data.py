@@ -3,6 +3,7 @@ import json
 from pymongo import MongoClient
 import os
 from timeit import default_timer as timer
+from datetime import datetime
 
 """
 The following code assumes that the data is stored in the same directory load_data.py. 
@@ -22,6 +23,9 @@ tweets_all = airlines["tweets_all"]
 # store erroneous tweet objects
 error = {} # key:value => json_file: nr of docs with error
 
+# store duplicates
+duplicates = 0
+
 # load "data" into MongoDB
 def load_airlines(path: str) -> None:
     """
@@ -33,7 +37,19 @@ def load_airlines(path: str) -> None:
         for doc in file:
             try:
                 data = json.loads(doc)
-                tweets_all.insert_one(data)
+
+                # assign tweet id as id for document
+                data["_id"] = data["id"] # assign tweet id as id for document
+                del data["id"]
+
+                # transform date into an datetime.datetime object
+                date_str = data["created_at"] # transform created_at into an datetime.datetime object
+                data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
+
+                try:
+                    tweets_all.insert_one(data)
+                except:
+                    duplicates += 1
             except:
                 error[path] = error.get(path, 0) + 1
 
@@ -60,6 +76,10 @@ Furthermore, the timer measures the total time (in sec) it took to load the data
 The error dictionary shows the amount of documents in a respective json file that were erroneous
 and thus could not be loaded into the database. 
 
+The duplicates variable is a counter of the number of duplicate documents. We have set the indexes to be 
+that of the tweet id. Since indexes must be unique, if a tweet object has the same index as a tweet object 
+that already exists in the database, the duplicates counter will be raised by one. 
+
 After loading all the data, make sure to comment the code again, since loading the data into 
 the database is a one-time procedure. 
 """
@@ -68,9 +88,11 @@ the database is a one-time procedure.
 # start = timer()
 # load_data()
 # end = timer()
-# 
+#
 # print(end - start)
 # print(error)
+# print(duplicates)
+
 
 # close connection
 client.close()
