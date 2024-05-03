@@ -39,17 +39,18 @@ def load_airlines(path: str) -> None:
                 data = json.loads(doc)
 
                 # assign tweet id as id for document
-                data["_id"] = data["id"] # assign tweet id as id for document
+                data["_id"] = data["id"]
                 del data["id"]
 
                 # transform date into an datetime.datetime object
-                date_str = data["created_at"] # transform created_at into an datetime.datetime object
+                date_str = data["created_at"]
                 data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
 
                 try:
                     tweets_all.insert_one(data)
                 except:
-                    duplicates.insert(data["_id"])
+                    duplicates.append(data["_id"])
+
             except:
                 error[path] = error.get(path, 0) + 1
 
@@ -85,14 +86,15 @@ After loading all the data, make sure to comment the code again, since loading t
 the database is a one-time procedure. 
 """
 
-# # Uncomment this block of code and then run the file once!
-# start = timer()
-# load_data()
-# end = timer()
-#
-# print(end - start)
-# print(error)
-# print(duplicates)
+# Uncomment this block of code and then run the file once!
+start = timer()
+load_data()
+end = timer()
+
+print(end - start)
+print(error)
+print(duplicates)
+print(len(duplicates))
 
 
 # close connection
