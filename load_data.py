@@ -23,6 +23,9 @@ tweets_all = airlines["tweets_all"]
 # store erroneous tweet objects
 error = {} # key:value => json_file: nr of docs with error
 
+# store duplicates
+duplicates = []
+
 # load "data" into MongoDB
 def load_airlines(path: str) -> None:
     """
@@ -30,9 +33,6 @@ def load_airlines(path: str) -> None:
     :param path: path to the json airlines file
     :return: None.
     """
-    # store duplicates
-    duplicates = 0
-
     with open(path) as file:
         for doc in file:
             try:
@@ -49,9 +49,10 @@ def load_airlines(path: str) -> None:
                 try:
                     tweets_all.insert_one(data)
                 except:
-                    duplicates += 1
+                    duplicates.insert(data["_id"])
             except:
                 error[path] = error.get(path, 0) + 1
+
 
 def load_data():
     """ Loads data into a database collection.
@@ -76,9 +77,9 @@ Furthermore, the timer measures the total time (in sec) it took to load the data
 The error dictionary shows the amount of documents in a respective json file that were erroneous
 and thus could not be loaded into the database. 
 
-The duplicates variable is a counter of the number of duplicate documents. We have set the indexes to be 
-that of the tweet id. Since indexes must be unique, if a tweet object has the same index as a tweet object 
-that already exists in the database, the duplicates counter will be raised by one. 
+Duplicates is a list of duplicate documents. We have set the indexes to be that of the tweet id. 
+Since indexes must be unique, if a tweet document has the same index as a tweet object 
+that already exists in the database, it will be added to the duplicates list. 
 
 After loading all the data, make sure to comment the code again, since loading the data into 
 the database is a one-time procedure. 
