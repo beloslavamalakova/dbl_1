@@ -21,10 +21,11 @@ airlines = client["airlines"]
 tweets_all = airlines["tweets_all"]
 
 # store erroneous tweet objects
-error = {} # key:value => json_file: nr of docs with error
+error = {}  # key:value => json_file: nr of docs with error
 
-# store duplicates
+# store tweet id of duplicates
 duplicates = []
+
 
 # load "data" into MongoDB
 def load_airlines(path: str) -> None:
@@ -35,35 +36,42 @@ def load_airlines(path: str) -> None:
     """
     with open(path) as file:
         for doc in file:
+            # some documents are erroneous
             try:
                 data = json.loads(doc)
-
-                # assign tweet id as id for document
-                data["_id"] = data["id"]
-                del data["id"]
-
-                # transform date into an datetime.datetime object
-                date_str = data["created_at"]
-                data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
-
-                try:
-                    tweets_all.insert_one(data)
-                except:
-                    duplicates.append(data["_id"])
-
             except:
                 error[path] = error.get(path, 0) + 1
+                continue
+
+            # some documents do not have id as immediate field (e.g. delete objects)
+            try:
+                # assign tweet id as id for document
+                data["_id"] = data["id"]
+
+                # transform date into a datetime.datetime object
+                date_str = data["created_at"]
+                data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
+            except:
+                tweets_all.insert_one(data)
+                continue
+
+            # some documents are duplicates
+            try:
+                tweets_all.insert_one(data)
+            except:
+                duplicates.append(data["_id"])
 
 
 def load_data():
     """ Loads data into a database collection.
     """
     count = 1
-    for json in os.listdir("data"): # iterate through all airlines files in data
+    for json in os.listdir("data"):  # iterate through all airlines files in data
         print(count)
         count += 1
 
-        load_airlines("data/"+json)
+        load_airlines("data/" + json)
+
 
 """
 Uncomment the code below in order to load the data. Make sure that the 
@@ -86,16 +94,15 @@ After loading all the data, make sure to comment the code again, since loading t
 the database is a one-time procedure. 
 """
 
-# Uncomment this block of code and then run the file once!
-start = timer()
-load_data()
-end = timer()
-
-print(end - start)
-print(error)
-print(duplicates)
-print(len(duplicates))
-
+# # Uncomment this block of code and then run the file once!
+# start = timer()
+# load_data()
+# end = timer()
+#
+# print(end - start)
+# print(error)
+# print(duplicates)
+# print(len(duplicates))
 
 # close connection
 client.close()
