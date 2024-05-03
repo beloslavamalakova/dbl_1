@@ -23,9 +23,6 @@ tweets_all = airlines["tweets_all"]
 # store erroneous tweet objects
 error = {} # key:value => json_file: nr of docs with error
 
-# store duplicates
-duplicates = 0
-
 # load "data" into MongoDB
 def load_airlines(path: str) -> None:
     """
@@ -33,6 +30,9 @@ def load_airlines(path: str) -> None:
     :param path: path to the json airlines file
     :return: None.
     """
+    # store duplicates
+    duplicates = 0
+
     with open(path) as file:
         for doc in file:
             try:
