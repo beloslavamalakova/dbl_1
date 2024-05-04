@@ -17,8 +17,8 @@ client = MongoClient()
 
 # create database named "airlines"
 airlines = client["airlines"]
-# create collection named "tweets_all"
-tweets_all = airlines["tweets_all"]
+# create collection named "tweets"
+tweets = airlines["tweets"]
 
 # store erroneous tweet objects
 error = {}  # key:value => json_file: nr of docs with error
@@ -52,12 +52,12 @@ def load_airlines(path: str) -> None:
                 date_str = data["created_at"]
                 data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
             except:
-                tweets_all.insert_one(data)
+                tweets.insert_one(data)
                 continue
 
             # some documents are duplicates
             try:
-                tweets_all.insert_one(data)
+                tweets.insert_one(data)
             except:
                 duplicates.append(data["_id"])
 
@@ -101,7 +101,6 @@ the database is a one-time procedure.
 #
 # print(end - start)
 # print(error)
-# print(duplicates)
 # print(len(duplicates))
 
 # close connection
