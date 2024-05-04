@@ -103,5 +103,6 @@ the database is a one-time procedure.
 # print(error)
 # print(len(duplicates))
 
+
 # close connection
 client.close()
