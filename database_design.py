@@ -7,7 +7,7 @@ def log_time(description, start_time):
 
 client = MongoClient()
 db = client["airlines"]
-old_collection = db["tweets_all"]
+old_collection = db["tweets"]
 
 user_collection = db["users"]
 tweet_with_user_collection = db["tweet_with_user_id"]
