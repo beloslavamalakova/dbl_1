@@ -17,10 +17,6 @@ tweets_all = db["tweets_all"]
 tweets_count = db.tweets_all.count_documents({})
 print(tweets_count) # result: 6511146
 
-# number of tweets with replies || ALL DOCS HAVE REPLY_COUNT = 0 
-reply_count = db.tweets_all.count_documents({"reply_count":{"gt":0}})
-print(reply_count) # result: 0
-
 # number of tweets that are replies ...
 # ... based on in_reply_to_status_id_str
 reply_tweets_status = db.tweets_all.count_documents({"in_reply_to_status_id_str": {"$ne": None}})
@@ -76,6 +72,34 @@ print(date_dict)
 
 # prints the date with the least amount of tweets (first day of the dataset)
 print(min(date_dict.keys()))
+
+# THE ONLY UNIQUE VALUE IS 0
+quote_unique = db.tweets_all.distinct("quote_count")
+print(quote_unique)
+
+# THE ONLY UNIQUE VALUE IS 0
+retweet_unique = db.tweets_all.distinct("retweet_count")
+print(retweet_unique)
+
+# THE ONLY UNIQUE VALUE IS 0
+favorite_unique = db.tweets_all.distinct("favorite_count")
+print(favorite_unique)
+
+# THE ONLY UNIQUE VALUE IS 0
+reply_unique = db.tweets_all.distinct("reply_count")
+print(reply_unique)
+
+# Both True and False
+truncated_unique = db.tweets_all.distinct("truncated")
+print(truncated_unique)
+
+# Both True and False
+quote_status_unique = db.tweets_all.distinct("is_quote_status")
+print(quote_status_unique)
+
+# Both True and False
+quote_status_unique = db.tweets_all.distinct("possibly_sensitive")
+print(quote_status_unique)
 
 
 # close connection
