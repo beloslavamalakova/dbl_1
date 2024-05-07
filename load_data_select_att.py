@@ -17,8 +17,8 @@ client = MongoClient()
 
 # create database named "airlines"
 airlines = client["airlines"]
-# create collection named "tweets"
-tweets = airlines["tweets"]
+# create collection named "tweets_select_att"
+tweets_select_att = airlines["tweets_select_att"]
 
 # store erroneous tweet objects
 error = {}  # key:value => json_file: nr of docs with error
@@ -30,6 +30,7 @@ duplicates = []
 non_tweet_objects = []
 
 # load "data" into MongoDB
+
 def load_airlines(path: str) -> None:
     """
     Loads a json airlines file into a database collection.
@@ -57,12 +58,63 @@ def load_airlines(path: str) -> None:
                 non_tweet_objects.append(data)
                 continue
 
+            # selecting on attributes
+            data_att = {}
+            data_att["_id"] = data["_id"]
+            data_att["created_at"] = data["created_at"]
+            data_att["created_at_datetime"] = data["created_at_datetime"]
+
+            # if truncated, full text appears in extended tweets
+            if data["truncated"] == True:
+                data_att["text"] = data["extended_tweet"]["full_text"]
+            else:
+                data_att["text"] = data["text"]
+
+            data_att["in_reply_to_status_id"] = data["in_reply_to_status_id"]
+            data_att["in_reply_to_user_id"] = data["in_reply_to_user_id"]
+            data_att["is_quote_status"] = data["is_quote_status"]
+            data_att["entities"] = data["entities"]
+
+            # not all documents have the possibly_sensitive field
+            if "possibly_sensitive" in data:
+                data_att["possibly_sensitive"] = data["possibly_sensitive"]
+
+            data_att["filter_level"] = data["filter_level"]
+            data_att["lang"] = data["lang"]
+            data_att["timestamp_ms"] = data["timestamp_ms"]
+            data_att["is_quote_status"] = data["is_quote_status"]
+
+            # if quote, additional quote related fields may surface
+            if data["is_quote_status"] == True and "quoted_status" in data:
+                data_att["quoted_status"] = data["quoted_status"]
+                data_att["quoted_status_id"] = data["quoted_status_id"]
+
+            # if retweet, additional retweeted_status field surfaces
+            if "retweeted_status" in data:
+                data_att["retweeted_status"] = data["retweeted_status"]
+
+            # user object
+            data_att["user"] = {}
+            data_att["user"]["id"] = data["user"]["id"]
+            data_att["user"]["name"] = data["user"]["name"]
+            data_att["user"]["screen_name"] = data["user"]["screen_name"]
+            data_att["user"]["location"] = data["user"]["location"]
+            data_att["user"]["protected"] = data["user"]["protected"]
+            data_att["user"]["verified"] = data["user"]["verified"]
+            data_att["user"]["followers_count"] = data["user"]["followers_count"]
+            data_att["user"]["friends_count"] = data["user"]["friends_count"]
+            data_att["user"]["listed_count"] = data["user"]["listed_count"]
+            data_att["user"]["favourites_count"] = data["user"]["favourites_count"]
+            data_att["user"]["statuses_count"] = data["user"]["statuses_count"]
+            data_att["user"]["created_at"] = data["user"]["created_at"]
+
+            data_att["entities"] = data["entities"]
+
             # some documents are duplicates
             try:
-                tweets.insert_one(data)
+                tweets_select_att.insert_one(data_att)
             except:
                 duplicates.append(data["_id"])
-
 
 def load_data():
     """ Loads data into a database collection.
@@ -73,7 +125,6 @@ def load_data():
         count += 1
 
         load_airlines("data/" + json)
-
 
 """
 Uncomment the code below in order to load the data. Make sure that the 
@@ -109,7 +160,6 @@ the database is a one-time procedure.
 # print(error)
 # print(len(duplicates))
 # print(len(non_tweet_objects))
-
 
 # close connection
 client.close()
