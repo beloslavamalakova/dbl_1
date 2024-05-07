@@ -26,6 +26,8 @@ error = {}  # key:value => json_file: nr of docs with error
 # store tweet id of duplicates
 duplicates = []
 
+# store non-tweet objects
+non_tweet_objects = []
 
 # load "data" into MongoDB
 def load_airlines(path: str) -> None:
@@ -52,7 +54,7 @@ def load_airlines(path: str) -> None:
                 date_str = data["created_at"]
                 data["created_at_datetime"] = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
             except:
-                tweets.insert_one(data)
+                non_tweet_objects.append(data)
                 continue
 
             # some documents are duplicates
@@ -95,13 +97,14 @@ the database is a one-time procedure.
 """
 
 # # Uncomment this block of code and then run the file once!
-# start = timer()
-# load_data()
-# end = timer()
-#
-# print(end - start)
-# print(error)
-# print(len(duplicates))
+start = timer()
+load_data()
+end = timer()
+
+print(end - start)
+print(error)
+print(len(duplicates))
+print(len(non_tweet_objects))
 
 
 # close connection
