@@ -18,7 +18,7 @@ client = MongoClient()
 # create database named "airlines"
 airlines = client["airlines"]
 # create collection named "tweets_select_att"
-tweets_select_att = airlines["tweets_select_att"]
+tweets_select_att = airlines["tweets_att"]
 
 # store erroneous tweet objects
 error = {}  # key:value => json_file: nr of docs with error
