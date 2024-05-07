@@ -72,6 +72,7 @@ def load_airlines(path: str) -> None:
 
             data_att["in_reply_to_status_id"] = data["in_reply_to_status_id"]
             data_att["in_reply_to_user_id"] = data["in_reply_to_user_id"]
+            data_att["in_reply_to_screen_name"]
             data_att["is_quote_status"] = data["is_quote_status"]
             data_att["entities"] = data["entities"]
 
