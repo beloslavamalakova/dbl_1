@@ -187,5 +187,23 @@ def klm_tweets():
 # print(klm_tweets()) # result: (34251, 155, 33993, 0.9924673732153806, 103, 17094)
 
 
+def weekly_distribution():
+    dates = [doc["created_at_datetime"] for doc in db.tweets_att.find({}, {"created_at_datetime": 1, "_id": 0})]
+
+    weekly_distribution = {'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0,
+                           'Sunday': 0}
+    for date in dates:
+        day_of_week = datetime.strftime(date, "%A")
+        weekly_distribution[day_of_week] += 1
+
+    plt.bar(weekly_distribution.keys(), weekly_distribution.values())
+    plt.title('Weekly Distribution of Tweets')
+    plt.tick_params(axis='x', labelsize=8)
+    plt.xlabel('Day of the Week', size=9)
+    plt.ylabel('Count')
+    plt.show()
+# weekly_distribution()
+
+
 # close connection
 client.close()
