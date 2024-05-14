@@ -136,7 +136,6 @@ def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str,any]:
         "entities": data["entities"],
         "filter_level": data["filter_level"],
         "lang": data["lang"],
-        "timestamp_ms": data["timestamp_ms"],
         "user": {
             "id": data["user"]["id"],
             "name": data["user"]["name"],
@@ -235,7 +234,6 @@ def insert_batch(batch: List[dict], path: str, duplicates: List[str]) -> None:
 #             "entities": data.get("entities"),
 #             "filter_level": data.get("filter_level"),
 #             "lang": data.get("lang"),
-#             "timestamp_ms": data.get("timestamp_ms"),
 #             "possibly_sensitive": data.get("possibly_sensitive", False)
 #         }
 #         tweet_updates.append(tweet_data)
