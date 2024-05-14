@@ -13,7 +13,7 @@ logging.basicConfig(filename='data_processing.log', level=logging.INFO, format='
 
 #Change this varialbe if yuo want to create a newly named database.
 #######################################################################
-name_database = "airlines_fast_load"
+name_database = "airlines_fast_test_with_new_id"
 
 #No need to adjust these when creating a collection.
 name_collection = "tweets_collection"
@@ -59,7 +59,7 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
         Non-tweet Objects: 2326
         Adjust batch_size to system memory and overall performance of system.
         On a system with 64GB RAM, 2000 batch_size is recommended by me :p
-        On a system with 32GB RAM, 1000 batch_size can be better.
+        On a system with 32GB RAM or lower, 1000 batch_size can be better.
     """
 
     print(f"Processing: {path}")
@@ -107,7 +107,7 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
                 logging.error(f"Decode error in file {path}: {e}")
                 continue
 
-    #Inserting tweets in batch in database collection
+    #Inserting tweets in batch
     if batch:
         insert_batch(batch, path, duplicates)
 
@@ -125,6 +125,7 @@ def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str,any]:
 
     attributes = {
         "_id": data["_id"],
+        "id": data["id"],
         "created_at": data["created_at"],
         "created_at_datetime": data["created_at_datetime"],
         "text": data["extended_tweet"]["full_text"] if data.get("truncated", False) else data["text"],
@@ -171,6 +172,8 @@ def insert_batch(batch: List[dict], path: str, duplicates: List[str]) -> None:
         #Insert into mongodb collection, ordered false because we don't care about order and it gives better
         #performance.
         tweets_select_att.insert_many(batch, ordered=False)
+
+
     except pymongo.errors.BulkWriteError as e:
 
         #Log error in bulk write
@@ -238,6 +241,7 @@ def update_database_design(name_collection):
         tweet_updates.append(tweet_data)
 
         if 'quoted_status' in data:
+
             quoted_tweet_data = {
                 "_id": data["quoted_status"]["id"],
                 #IDK WHAT AATTRR???
@@ -269,9 +273,6 @@ def update_tweets_collection(tweet_data):
 def update_quoted_tweets_collection(quoted_tweet_data):
     quoted_tweet_data["_id"] = quoted_tweet_data["id"]
     quoted_tweets.replace_one({"_id": quoted_tweet_data["_id"]}, quoted_tweet_data, upsert=True)
-
-#if __name__ == '__main__':
-    #update_database_design(name_collection)
 
 def load_data():
     """
