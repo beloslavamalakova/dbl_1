@@ -1,105 +1,190 @@
+import json
 from pymongo import MongoClient
-from pprint import pprint
+import os
+from timeit import default_timer as timer
 from datetime import datetime
-
+from pprint import pprint
+import matplotlib.pyplot as plt
 
 # establish connection to MongoDB
 client = MongoClient()
 
 # database and collection
 db = client["airlines"]
-tweets_all = db["tweets_all"]
+tweets_att = db["tweets_att"]
 
 
-# note that this is as performed on the RAW data, which may well contain duplicates etc.
+# DATA EXPLORATION
 
-# total number of tweets
-tweets_count = db.tweets_all.count_documents({})
-print(tweets_count) # result: 6511146
+# from load_data.py
+error = {'data/airlines-1558611772040.json': 63, 'data/airlines-1558623303180.json': 120,
+         'data/airlines-1559860041436.json': 63, 'data/airlines-1560138591670.json': 1,
+         'data/airlines-1565894560588.json': 1, 'data/airlines-1569957146471.json': 1,
+         'data/airlines-1570104381202.json': 1, 'data/airlines-1573229502947.json': 1,
+         'data/airlines-1575313134067.json': 1, 'data/airlines-1583171908044.json': 1,
+         'data/airlines-1583253051533.json': 5}
 
-# number of tweets that are replies ...
-# ... based on in_reply_to_status_id_str
-reply_tweets_status = db.tweets_all.count_documents({"in_reply_to_status_id_str": {"$ne": None}})
-print(reply_tweets_status) # result: 1893340
+duplicates = 414685
 
-# ... based on in_reply_to_user_id_str
-reply_tweets_user_id = db.tweets_all.count_documents({"in_reply_to_user_id_str": {"$ne": None}})
-print(reply_tweets_user_id) # result: 2353210
-
-# all languages
-lang_list = db.tweets_all.distinct("lang")
-print(lang_list)
-
-lang_list = ['am', 'ar', 'bg', 'bn', 'ca', 'ckb', 'cs', 'cy', 'da', 'de', 'dv', 'el', 'en', 'es', 'et', 'eu',
-             'fa', 'fi', 'fr', 'gu', 'hi', 'ht', 'hu', 'hy', 'in', 'is', 'it', 'iw', 'ja', 'ka', 'kn', 'ko',
-             'lo', 'lt', 'lv', 'ml', 'mr', 'my', 'ne', 'nl', 'no', 'or', 'pa', 'pl', 'ps', 'pt', 'ro', 'ru',
-             'sd', 'si', 'sl', 'sr', 'sv', 'ta', 'te', 'th', 'tl', 'tr', 'uk', 'und', 'ur', 'vi', 'zh']
-
-# number of english tweets
-en_tweets_count = db.tweets_all.count_documents({"lang":"en"})
-print(en_tweets_count) # result: 4730503
-
-# number of dutch tweets
-nl_tweets_count = db.tweets_all.count_documents({"lang":"nl"})
-print(nl_tweets_count) # result: 206641
-
-# number of undefined language tweets
-und_tweets_count = db.tweets_all.count_documents({"lang": "und"})
-print(und_tweets_count) # result: 190928
-
-# number of deleted tweets
-deleted_tweets_count = db.tweets_all.distinct("delete")
-print(len(deleted_tweets_count))  # result: 2180
+non_tweet_objects = 2326
 
 
-# finds the amount of tweets send per day || FUNCTION TAKES TOO LONG!!!
-date_dict = {}
-for tweet in tweets_all.find():
-    try:
-        date_string = tweet["created_at"]
-        date_object = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
-        date = (date_object.year, date_object.month, date_object.day)
+# total number of unique tweet objects
+def doc_count():
+    return db.tweets_att.count_documents({})
+# print(doc_count()) # result: 6094135
 
-        if date not in date_dict:
-            date_dict[date] = 1
-        else:
-            date_dict[date] += 1
-    except:
-        continue
 
-# prints full dictionary
-print(date_dict)
+# create index for created_at_datetime
+db.tweets_att.create_index([("created_at_datetime", 1)])
 
-# prints the date with the least amount of tweets (first day of the dataset)
-print(min(date_dict.keys()))
 
-# THE ONLY UNIQUE VALUE IS 0
-quote_unique = db.tweets_all.distinct("quote_count")
-print(quote_unique)
+# first tweet
+def first_tweet():
+    return db.tweets_att.find({}, {"created_at_datetime":1}).sort("created_at_datetime")
+# print(first_tweet()[0]["created_at_datetime"]) # result: 2019-05-22 12:20:00
 
-# THE ONLY UNIQUE VALUE IS 0
-retweet_unique = db.tweets_all.distinct("retweet_count")
-print(retweet_unique)
 
-# THE ONLY UNIQUE VALUE IS 0
-favorite_unique = db.tweets_all.distinct("favorite_count")
-print(favorite_unique)
+# last tweet
+def last_tweet():
+    return db.tweets_att.find({}, {"created_at_datetime": 1}).sort([("created_at_datetime", -1)])
+# print(last_tweet()[0]["created_at_datetime"]) # result: 2020-03-30 18:43:16
 
-# THE ONLY UNIQUE VALUE IS 0
-reply_unique = db.tweets_all.distinct("reply_count")
-print(reply_unique)
 
-# Both True and False
-truncated_unique = db.tweets_all.distinct("truncated")
-print(truncated_unique)
+# distribution over time
+def distribution_over_time():
+    dates = [date["created_at_datetime"] for date in db.tweets_att.find({}, {"created_at_datetime":1, "_id":0})]
 
-# Both True and False
-quote_status_unique = db.tweets_all.distinct("is_quote_status")
-print(quote_status_unique)
+    # plot histogram
+    plt.figure(figsize=(10,8))
+    plt.hist(dates, bins=10, edgecolor="black")
+    plt.xticks(rotation="vertical")
 
-# Both True and False
-quote_status_unique = db.tweets_all.distinct("possibly_sensitive")
-print(quote_status_unique)
+    # adding labels and title
+    plt.xlabel('Date', size=14)
+    plt.ylabel('Frequency', size=14)
+    plt.title('Distribution of tweets over time', size=20, fontweight="bold")
+
+    # show plot
+    plt.savefig("plots/distribution_over_time.png")
+    plt.show()
+# distribution_over_time()
+
+
+# create index for language
+db.tweets_att.create_index([("lang", 1)])
+
+
+# distinct languages
+def languages():
+    return list(db.tweets_att.distinct("lang"))
+# print(languages())
+
+
+# frequencies of languages
+def frequencies_languages():
+    tweet_count = 6094135
+
+    pipeline = [
+        {
+            '$group': {
+                '_id': {"language": "$lang"},
+                'count': {"$sum": 1}
+            }
+        },
+        {
+            '$sort': {'count': -1}
+        }
+    ]
+    # plot barchart
+    color = ["cyan", "yellow", "blue", "orange", "grey", "green"]
+
+    languages = list(db.tweets_att.aggregate(pipeline))
+
+    top_5 = {lang["_id"]["language"]: lang["count"] / tweet_count for lang in languages[:5]}
+    top_5["other"] = sum([lang["count"] for lang in languages[5:]]) / tweet_count
+
+    plt.figure(figsize=(6, 6))
+    plt.bar(list(top_5.keys()), list(top_5.values()), color=color)
+
+    # adding labels and title
+    plt.xlabel('Language', size=12)
+    plt.ylabel('Relative frequency', size=12)
+    plt.title('Frequencies of tweet languages', size=16, fontweight="bold")
+
+    # show plot
+    plt.savefig("plots/frequencies_languages")
+    plt.show()
+# frequencies_languages()
+
+
+# example undefined language tweet
+def und_tweet():
+    und_tweet = db.tweets_att.find({"lang":"und"}, {"text":1, "lang":1})[2]
+    return und_tweet
+# print(und_tweet())
+
+
+# number of retweets
+def retweets():
+    quote_tweet = db.tweets_att.count_documents({"quoted_status": {"$exists": True}, "retweeted_status": {"$exists": False}})
+    retweet_tweet = db.tweets_att.count_documents({"retweeted_status": {"$exists": True}, "quoted_status": {"$exists": False}})
+    both = db.tweets_att.count_documents({"quoted_status": {"$exists": True}, "retweeted_status": {"$exists": True}})
+
+    labels = ["retweet tweet", "quote tweet", "both"]
+    values = [retweet_tweet, quote_tweet, both]
+
+    # plot barchart
+    plt.figure(figsize=(6, 6))
+    plt.bar(labels, values, color=["blue", "orange", "green"])
+
+    # adding labels and title
+    plt.xlabel('Tweet type', size=12)
+    plt.ylabel('Frequency', size=12)
+    plt.title('Frequency of retweets', size=16, fontweight="bold")
+
+    # show plot
+    plt.savefig("plots/frequencies_retweets")
+    plt.show()
+# retweets()
+
+
+# number of original tweets
+def original_tweets():
+    original_tweet = db.tweets_att.count_documents({"quoted_status": {"$exists": False}, "retweeted_status": {"$exists": False}})
+    return original_tweet
+# print(original_tweets()) # result: 3042450
+
+
+# create index of user mentions
+db.tweets_att.create_index("user_mentions.id")
+
+# response rate of KLM
+airlines = {"KLM": 56377143, "AirFrance": 106062176, "British_Airways": 18332190, "AmericanAir": 22536055,
+            "Lufthansa": 124476322, "AirBerlin": 26223583, "AirBerlin assist": 2182373406,
+            "easyJet": 38676903, "RyanAir": 1542862735, "SingaporeAir": 253340062, "Qantas": 218730857,
+            "EtihadAirways": 45621423, "VirginAtlantic": 20626359}
+# print(len(airlines))
+
+
+# create index of user id
+db.tweets_att.create_index("user.id")
+
+
+def klm_mention():
+    return db.tweets_att.count_documents({"entities.user_mentions.id": airlines["KLM"]})
+# print(klm_mention) # result: 226887
+
+
+# tweets from KLM
+def klm_tweets():
+    klm_total = db.tweets_att.count_documents({"user.id": airlines["KLM"]})
+    klm_original = db.tweets_att.count_documents({"user.id": airlines["KLM"], "in_reply_to_status_id": None, "in_reply_to_user_id": None})
+    klm_reply = db.tweets_att.count_documents({"user.id": airlines["KLM"], "in_reply_to_status_id": {"$ne": None}, "in_reply_to_user_id": {"$ne": None}})
+    klm_reply_users = db.tweets_att.distinct("in_reply_to_user_id", {"user.id": airlines["KLM"],"in_reply_to_status_id": {"$ne": None}, "in_reply_to_user_id": {"$ne": None}})
+
+    return klm_total, klm_original, klm_reply, (klm_reply / klm_total), (klm_total - klm_reply - klm_original), len(klm_reply_users)
+# print(klm_tweets()) # result: (34251, 155, 33993, 0.9924673732153806, 103, 17094)
 
 
 # close connection
