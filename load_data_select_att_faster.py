@@ -13,7 +13,7 @@ logging.basicConfig(filename='data_processing.log', level=logging.INFO, format='
 
 #Change this varialbe if yuo want to create a newly named database.
 #######################################################################
-name_database = "airlines_fixed_attttttttrrrr_5"
+name_database = "airlines_fixed_attributes"
 
 #No need to adjust these when creating a collection.
 name_collection = "tweets_collection"
