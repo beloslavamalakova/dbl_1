@@ -185,94 +185,94 @@ def insert_batch(batch: List[dict], path: str, duplicates: List[str]) -> None:
                 #Adding to dupl list.
                 duplicates.append(err['op']['_id'])
 
-
-def update_database_design(name_collection):
-    """
-    Restructures the existing MongoDB collection
-    """
-    global airlines, tweets, quoted_tweets, users
-
-    #Create indexes for new coll to improve performance
-    tweets.create_index([("_id", pymongo.ASCENDING)])
-    quoted_tweets.create_index([("_id", pymongo.ASCENDING)])
-    users.create_index([("_id", pymongo.ASCENDING)])
-
-    manager = Manager()
-    user_ids = manager.list()
-    tweet_updates = manager.list()
-    quoted_tweet_ids = manager.list()
-
-    processed_count = 0
-    print_frequency = 10000
-
-    collection_data_full = airlines[name_collection].find({})
-
-    for data in collection_data_full:
-        user_data = {
-            "_id": data["user"]["id"],
-            "name": data["user"]["name"],
-            "screen_name": data["user"]["screen_name"],
-            "location": data["user"]["location"],
-            "protected": data["user"]["protected"],
-            "verified": data["user"]["verified"],
-            "followers_count": data["user"]["followers_count"],
-            "friends_count": data["user"]["friends_count"],
-            "listed_count": data["user"]["listed_count"],
-            "favourites_count": data["user"]["favourites_count"],
-            "statuses_count": data["user"]["statuses_count"],
-            "created_at": data["user"]["created_at"]
-        }
-        user_ids.append(user_data)
-
-        tweet_data = {
-            "_id": data["_id"],
-            "created_at": data["created_at"],
-            "text": data.get("extended_tweet", {}).get("full_text", data.get("text", "")),
-            "in_reply_to_status_id": data.get("in_reply_to_status_id"),
-            "in_reply_to_user_id": data.get("in_reply_to_user_id"),
-            "in_reply_to_screen_name": data.get("in_reply_to_screen_name"),
-            "is_quote_status": data.get("is_quote_status"),
-            "entities": data.get("entities"),
-            "filter_level": data.get("filter_level"),
-            "lang": data.get("lang"),
-            "timestamp_ms": data.get("timestamp_ms"),
-            "possibly_sensitive": data.get("possibly_sensitive", False)
-        }
-        tweet_updates.append(tweet_data)
-
-        if 'quoted_status' in data:
-
-            quoted_tweet_data = {
-                "_id": data["quoted_status"]["id"],
-                #IDK WHAT AATTRR???
-            }
-            quoted_tweet_ids.append(quoted_tweet_data)
-
-        processed_count += 1
-        if processed_count % print_frequency == 0:
-            print(f"Adjusted Design for {processed_count} tweets.")
-
-    #Using multiprocessing to update strucutred data in prallel
-    with Pool(processes=os.cpu_count()) as pool:
-        pool.map(update_users_collection, user_ids)
-        pool.map(update_tweets_collection, tweet_updates)
-        pool.map(update_quoted_tweets_collection, quoted_tweet_ids)
-
-    print("Data Design Change Done")
-
-def update_users_collection(user_data):
-    user_data["_id"] = user_data["id"]
-
-    #Upserting the user data into users collection, if document with same id exists
-    #If no doc exists a new one is created
-    users.replace_one({"_id": user_data["_id"]}, user_data, upsert=True)
-
-def update_tweets_collection(tweet_data):
-    tweets.replace_one({"_id": tweet_data["_id"]}, tweet_data, upsert=True)
-
-def update_quoted_tweets_collection(quoted_tweet_data):
-    quoted_tweet_data["_id"] = quoted_tweet_data["id"]
-    quoted_tweets.replace_one({"_id": quoted_tweet_data["_id"]}, quoted_tweet_data, upsert=True)
+# def update_database_design(name_collection):
+#     """
+#     Restructures the existing MongoDB collection
+#     """
+#     global airlines, tweets, quoted_tweets, users
+#
+#     #Create indexes for new coll to improve performance
+#     tweets.create_index([("_id", pymongo.ASCENDING)])
+#     quoted_tweets.create_index([("_id", pymongo.ASCENDING)])
+#     users.create_index([("_id", pymongo.ASCENDING)])
+#
+#     manager = Manager()
+#     user_ids = manager.list()
+#     tweet_updates = manager.list()
+#     quoted_tweet_ids = manager.list()
+#
+#     processed_count = 0
+#     print_frequency = 10000
+#
+#     collection_data_full = airlines[name_collection].find({})
+#
+#     for data in collection_data_full:
+#         user_data = {
+#             "_id": data["user"]["id"],
+#             "name": data["user"]["name"],
+#             "screen_name": data["user"]["screen_name"],
+#             "location": data["user"]["location"],
+#             "protected": data["user"]["protected"],
+#             "verified": data["user"]["verified"],
+#             "followers_count": data["user"]["followers_count"],
+#             "friends_count": data["user"]["friends_count"],
+#             "listed_count": data["user"]["listed_count"],
+#             "favourites_count": data["user"]["favourites_count"],
+#             "statuses_count": data["user"]["statuses_count"],
+#             "created_at": data["user"]["created_at"]
+#         }
+#         user_ids.append(user_data)
+#
+#         tweet_data = {
+#             "_id": data["_id"],
+#             "id": data["id"],
+#             "created_at": data["created_at"],
+#             "text": data.get("extended_tweet", {}).get("full_text", data.get("text", "")),
+#             "in_reply_to_status_id": data.get("in_reply_to_status_id"),
+#             "in_reply_to_user_id": data.get("in_reply_to_user_id"),
+#             "in_reply_to_screen_name": data.get("in_reply_to_screen_name"),
+#             "is_quote_status": data.get("is_quote_status"),
+#             "entities": data.get("entities"),
+#             "filter_level": data.get("filter_level"),
+#             "lang": data.get("lang"),
+#             "timestamp_ms": data.get("timestamp_ms"),
+#             "possibly_sensitive": data.get("possibly_sensitive", False)
+#         }
+#         tweet_updates.append(tweet_data)
+#
+#         if 'quoted_status' in data:
+#
+#             quoted_tweet_data = {
+#                 "_id": data["quoted_status"]["id"],
+#                 #IDK WHAT AATTRR???
+#             }
+#             quoted_tweet_ids.append(quoted_tweet_data)
+#
+#         processed_count += 1
+#         if processed_count % print_frequency == 0:
+#             print(f"Adjusted Design for {processed_count} tweets.")
+#
+#     #Using multiprocessing to update strucutred data in prallel
+#     with Pool(processes=os.cpu_count()) as pool:
+#         pool.map(update_users_collection, user_ids)
+#         pool.map(update_tweets_collection, tweet_updates)
+#         pool.map(update_quoted_tweets_collection, quoted_tweet_ids)
+#
+#     print("Data Design Change Done")
+#
+# def update_users_collection(user_data):
+#     user_data["_id"] = user_data["id"]
+#
+#     #Upserting the user data into users collection, if document with same id exists
+#     #If no doc exists a new one is created
+#     users.replace_one({"_id": user_data["_id"]}, user_data, upsert=True)
+#
+# def update_tweets_collection(tweet_data):
+#     tweets.replace_one({"_id": tweet_data["_id"]}, tweet_data, upsert=True)
+#
+# def update_quoted_tweets_collection(quoted_tweet_data):
+#     quoted_tweet_data["_id"] = quoted_tweet_data["id"]
+#     quoted_tweets.replace_one({"_id": quoted_tweet_data["_id"]}, quoted_tweet_data, upsert=True)
 
 def load_data():
     """
