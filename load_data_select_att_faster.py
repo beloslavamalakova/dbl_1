@@ -13,7 +13,7 @@ logging.basicConfig(filename='data_processing.log', level=logging.INFO, format='
 
 #Change this varialbe if yuo want to create a newly named database.
 #######################################################################
-name_database = "airlines_fast_test_with_new_id"
+name_database = "airlines_fixed_attttttttrrrr_5"
 
 #No need to adjust these when creating a collection.
 name_collection = "tweets_collection"
@@ -118,22 +118,34 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
 
     logging.info(f"Finished processing file {path}: {processed_count} records processed")
 
-def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str,any]:
+
+def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str, any]:
     """
     Extract the attributes we want to filter from the tweets.
     """
 
+    if data.get("truncated", False):
+        text = data["extended_tweet"]["full_text"]
+        entities = data["extended_tweet"]["entities"]
+    else:
+        text = data["text"]
+        entities = data["entities"]
+
+    filtered_entities = {
+        "hashtags": entities.get("hashtags", []),
+        "user_mentions": entities.get("user_mentions", [])
+    }
+
     attributes = {
         "_id": data["_id"],
         "id": data["id"],
-        "created_at": data["created_at"],
         "created_at_datetime": data["created_at_datetime"],
-        "text": data["extended_tweet"]["full_text"] if data.get("truncated", False) else data["text"],
+        "text": text,
+        "entities": filtered_entities,
         "in_reply_to_status_id": data["in_reply_to_status_id"],
         "in_reply_to_user_id": data["in_reply_to_user_id"],
         "in_reply_to_screen_name": data["in_reply_to_screen_name"],
         "is_quote_status": data["is_quote_status"],
-        "entities": data["entities"],
         "filter_level": data["filter_level"],
         "lang": data["lang"],
         "user": {
@@ -147,19 +159,74 @@ def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str,any]:
             "friends_count": data["user"]["friends_count"],
             "listed_count": data["user"]["listed_count"],
             "favourites_count": data["user"]["favourites_count"],
-            "statuses_count": data["user"]["statuses_count"],
             "created_at": data["user"]["created_at"]
         },
         "possibly_sensitive": data.get("possibly_sensitive")
     }
-    #Check if quote tweet -> extract quote tweet attr.
-    if data.get("is_quote_status", False) and "quoted_status" in data:
-        attributes["quoted_status"] = data["quoted_status"]
-        attributes["quoted_status_id"] = data["quoted_status_id"]
 
-    #Check if retweet -> extract retweeted attr.
+    if data.get("is_quote_status", False) and "quoted_status" in data:
+        quoted_status = data["quoted_status"]
+
+        quoted_text = quoted_status["text"]
+        quoted_entities = quoted_status["entities"]
+
+        quoted_filtered_entities = {
+            "hashtags": quoted_entities.get("hashtags", []),
+            "user_mentions": quoted_entities.get("user_mentions", [])
+        }
+
+        attributes["quoted_status"] = {
+            "id": quoted_status["id"],
+            "created_at": quoted_status["created_at"],
+            "text": quoted_text,
+            "entities": quoted_filtered_entities,
+            "in_reply_to_status_id": quoted_status["in_reply_to_status_id"],
+            "in_reply_to_user_id": quoted_status["in_reply_to_user_id"],
+            "in_reply_to_screen_name": quoted_status["in_reply_to_screen_name"],
+            "is_quote_status": quoted_status["is_quote_status"],
+            "filter_level": quoted_status.get("filter_level"),
+            "lang": quoted_status.get("lang"),
+            "user": {
+                "id": quoted_status["user"]["id"],
+                "name": quoted_status["user"].get("name"),
+                "screen_name": quoted_status["user"]["screen_name"],
+                "location": quoted_status["user"].get("location"),
+                "protected": quoted_status["user"]["protected"],
+                "verified": quoted_status["user"]["verified"],
+                "followers_count": quoted_status["user"]["followers_count"],
+                "friends_count": quoted_status["user"]["friends_count"],
+                "listed_count": quoted_status["user"]["listed_count"],
+                "favourites_count": quoted_status["user"]["favourites_count"],
+                "created_at": quoted_status["user"]["created_at"]
+            },
+            "possibly_sensitive": quoted_status.get("possibly_sensitive")
+        }
+
     if "retweeted_status" in data:
-        attributes["retweeted_status"] = data["retweeted_status"]
+        retweeted_status = data["retweeted_status"]
+        if retweeted_status.get("truncated", False):
+            retweeted_text = retweeted_status["extended_tweet"]["full_text"]
+            retweeted_entities = retweeted_status["extended_tweet"]["entities"]
+        else:
+            retweeted_text = retweeted_status["text"]
+            retweeted_entities = retweeted_status["entities"]
+
+        retweeted_filtered_entities = {
+            "hashtags": retweeted_entities.get("hashtags", []),
+            "user_mentions": retweeted_entities.get("user_mentions", [])
+        }
+
+        attributes["retweeted_status"] = {
+            "id": retweeted_status["id"],
+            "created_at": retweeted_status["created_at"],
+            "text": retweeted_text,
+            "entities": retweeted_filtered_entities,
+            "user": {
+                "id": retweeted_status["user"]["id"],
+                "screen_name": retweeted_status["user"]["screen_name"]
+            }
+        }
+
     return attributes
 
 def insert_batch(batch: List[dict], path: str, duplicates: List[str]) -> None:

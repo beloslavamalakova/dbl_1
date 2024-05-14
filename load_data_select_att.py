@@ -16,7 +16,7 @@ the json airlines files.
 client = MongoClient()
 
 # create database named "airlines"
-airlines = client["airlines"]
+airlines = client["airlines_slow_test_2"]
 # create collection named "tweets_select_att"
 tweets_select_att = airlines["tweets_att"]
 
@@ -153,14 +153,14 @@ the database is a one-time procedure.
 """
 
 # # Uncomment this block of code and then run the file once!
-# start = timer()
-# load_data()
-# end = timer()
-#
-# print(end - start)
-# print(error)
-# print(len(duplicates))
-# print(len(non_tweet_objects))
+start = timer()
+load_data()
+end = timer()
+
+print(end - start)
+print(error)
+print(len(duplicates))
+print(len(non_tweet_objects))
 
 # close connection
 client.close()
