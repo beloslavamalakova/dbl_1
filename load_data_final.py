@@ -103,7 +103,7 @@ def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str, any]:
     Extract the attributes we want to filter from the tweets.
     """
 
-    if data.get("truncated", False):
+    if data["truncated"] == True:
         text = data["extended_tweet"]["full_text"]
         entities = data["extended_tweet"]["entities"]
     else:
