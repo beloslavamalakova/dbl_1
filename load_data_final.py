@@ -8,30 +8,19 @@ import logging
 from typing import List, Dict
 import pymongo
 
-#Changing data design after currently takes:
 logging.basicConfig(filename='data_processing.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-#Change this variable
-#######################################################################
+#Change the name of the database in mongodb using name_database
 name_database = "airlines"
 
-#No need to adjust these when creating a collection.
 name_collection = "tweets_collection"
-tweets_collection_name = "tweets"
-quoted_tweets_collection_name = "quoted_tweets"
-users_collection_name = "users"
 
-#Connection with client & Connecting database
 client = MongoClient()
 airlines = client[name_database]
 tweets_select_att = airlines[name_collection]
 
-#Database Design Creation, only uncomment if you are also updating database design.
-tweets = airlines[tweets_collection_name]
-quoted_tweets = airlines[quoted_tweets_collection_name]
-users = airlines[users_collection_name]
 
-def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict[str, str]], error: Dict[str, int]) -> None:
+def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict[str, str]], error: Dict[str, int]):
     """
     Without database design it runs in 2.54 min on my system
     Duplicates 414685
@@ -48,7 +37,6 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
     batch_size = 2000
     batch = []
 
-    #Processing Errors:
     processed_count = 0
     file_errors = 0
 
@@ -57,18 +45,14 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
             try:
                 data = ujson.loads(doc)
 
-                #Check for non-tweet objects
                 if "id" not in data:
                     non_tweet_objects.append(data)
                     continue
 
-                #Add extra id attribute.
                 data["_id"] = data["id"]
 
-                #Parsing to date time
                 data["created_at_datetime"] = datetime.strptime(data["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
-                #Extracting for batch prep
                 data_att = extract_tweet_attributes(data)
 
                 #Adding to batch
