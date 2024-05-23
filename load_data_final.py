@@ -10,7 +10,7 @@ import pymongo
 
 logging.basicConfig(filename='data_processing.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-#Change the name of the database in mongodb using name_database
+# Change the name of the database in mongodb by changing name_database
 name_database = "airlines"
 
 name_collection = "tweets_collection"
@@ -26,14 +26,11 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
     Duplicates 414685
     Non-tweet Objects: 2326
     Adjust batch_size to system memory and overall performance of system.
-    On a system with 64GB RAM, 2000 batch_size is recommended by me :p
-    On a system with 32GB RAM or lower, 1000 batch_size can be better.
     """
 
     print(f"Processing: {path}")
 
-    # Adjust this number as mentioned in docstring.
-    # Amount of tweets to process before insertion.
+    # Adjust the batch_size here:
     batch_size = 2000
     batch = []
 
@@ -50,31 +47,23 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
                     continue
 
                 data["_id"] = data["id"]
-
                 data["created_at_datetime"] = datetime.strptime(data["created_at"], "%a %b %d %H:%M:%S %z %Y")
-
                 data_att = extract_tweet_attributes(data)
-
-                #Adding to batch
                 batch.append(data_att)
                 processed_count += 1
 
-                #Check if batch size reached
                 if len(batch) >= batch_size:
                     insert_batch(batch, path, duplicates)
                     batch = []
 
-            #Logging error when occured.
             except ujson.JSONDecodeError as e:
                 file_errors += 1
                 logging.error(f"Decode error in file {path}: {e}")
                 continue
 
-    #Inserting tweets in batch
     if batch:
         insert_batch(batch, path, duplicates)
 
-    #Log errors
     if file_errors > 0:
         error[path] = file_errors
         logging.error(f"File {path} had {file_errors} JSON decode errors")
@@ -82,12 +71,12 @@ def load_airlines(path: str, duplicates: List[str], non_tweet_objects: List[Dict
     logging.info(f"Finished processing file {path}: {processed_count} records processed")
 
 
-def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str, any]:
+def extract_tweet_attributes(data: Dict[str, any]):
     """
     Extract the attributes we want to filter from the tweets.
     """
 
-    if data["truncated"] == True:
+    if data["truncated"]:
         text = data["extended_tweet"]["full_text"]
         entities = data["extended_tweet"]["entities"]
     else:
@@ -189,117 +178,29 @@ def extract_tweet_attributes(data: Dict[str, any]) -> Dict[str, any]:
                 "screen_name": retweeted_status["user"]["screen_name"]
             }
         }
-
     return attributes
 
-def insert_batch(batch: List[dict], path: str, duplicates: List[str]) -> None:
+
+def insert_batch(batch: List[dict], path: str, duplicates: List[str]):
     """
     Inserts a batch of tweets into the MongoDB collection (Used in load).
     """
     try:
-        #Insert into mongodb collection, ordered false because we don't care about order and it gives better
-        #performance.
+        # Insert into mongodb collection, ordered false because we don't care about order and it gives better
+        # performance.
         tweets_select_att.insert_many(batch, ordered=False)
-
 
     except pymongo.errors.BulkWriteError as e:
 
-        #Log error in bulk write
+        # Log error in bulk write
         logging.error(f"Bulk write error for file {path}: {e.details}")
 
-        #Loop to identify dupl.
+        # Loop to identify dupl.
         for err in e.details['writeErrors']:
             if err['code'] == 11000:
-                #Adding to dupl list.
+                # Adding to dupl list.
                 duplicates.append(err['op']['_id'])
 
-# def update_database_design(name_collection):
-#     """
-#     Restructures the existing MongoDB collection
-#     """
-#     global airlines, tweets, quoted_tweets, users
-#
-#     #Create indexes for new coll to improve performance
-#     tweets.create_index([("_id", pymongo.ASCENDING)])
-#     quoted_tweets.create_index([("_id", pymongo.ASCENDING)])
-#     users.create_index([("_id", pymongo.ASCENDING)])
-#
-#     manager = Manager()
-#     user_ids = manager.list()
-#     tweet_updates = manager.list()
-#     quoted_tweet_ids = manager.list()
-#
-#     processed_count = 0
-#     print_frequency = 10000
-#
-#     collection_data_full = airlines[name_collection].find({})
-#
-#     for data in collection_data_full:
-#         user_data = {
-#             "_id": data["user"]["id"],
-#             "name": data["user"]["name"],
-#             "screen_name": data["user"]["screen_name"],
-#             "location": data["user"]["location"],
-#             "protected": data["user"]["protected"],
-#             "verified": data["user"]["verified"],
-#             "followers_count": data["user"]["followers_count"],
-#             "friends_count": data["user"]["friends_count"],
-#             "listed_count": data["user"]["listed_count"],
-#             "favourites_count": data["user"]["favourites_count"],
-#             "statuses_count": data["user"]["statuses_count"],
-#             "created_at": data["user"]["created_at"]
-#         }
-#         user_ids.append(user_data)
-#
-#         tweet_data = {
-#             "_id": data["_id"],
-#             "id": data["id"],
-#             "created_at": data["created_at"],
-#             "text": data.get("extended_tweet", {}).get("full_text", data.get("text", "")),
-#             "in_reply_to_status_id": data.get("in_reply_to_status_id"),
-#             "in_reply_to_user_id": data.get("in_reply_to_user_id"),
-#             "in_reply_to_screen_name": data.get("in_reply_to_screen_name"),
-#             "is_quote_status": data.get("is_quote_status"),
-#             "entities": data.get("entities"),
-#             "filter_level": data.get("filter_level"),
-#             "lang": data.get("lang"),
-#             "possibly_sensitive": data.get("possibly_sensitive", False)
-#         }
-#         tweet_updates.append(tweet_data)
-#
-#         if 'quoted_status' in data:
-#
-#             quoted_tweet_data = {
-#                 "_id": data["quoted_status"]["id"],
-#                 #IDK WHAT AATTRR???
-#             }
-#             quoted_tweet_ids.append(quoted_tweet_data)
-#
-#         processed_count += 1
-#         if processed_count % print_frequency == 0:
-#             print(f"Adjusted Design for {processed_count} tweets.")
-#
-#     #Using multiprocessing to update strucutred data in prallel
-#     with Pool(processes=os.cpu_count()) as pool:
-#         pool.map(update_users_collection, user_ids)
-#         pool.map(update_tweets_collection, tweet_updates)
-#         pool.map(update_quoted_tweets_collection, quoted_tweet_ids)
-#
-#     print("Data Design Change Done")
-#
-# def update_users_collection(user_data):
-#     user_data["_id"] = user_data["id"]
-#
-#     #Upserting the user data into users collection, if document with same id exists
-#     #If no doc exists a new one is created
-#     users.replace_one({"_id": user_data["_id"]}, user_data, upsert=True)
-#
-# def update_tweets_collection(tweet_data):
-#     tweets.replace_one({"_id": tweet_data["_id"]}, tweet_data, upsert=True)
-#
-# def update_quoted_tweets_collection(quoted_tweet_data):
-#     quoted_tweet_data["_id"] = quoted_tweet_data["id"]
-#     quoted_tweets.replace_one({"_id": quoted_tweet_data["_id"]}, quoted_tweet_data, upsert=True)
 
 def load_data():
     """
@@ -314,10 +215,8 @@ def load_data():
     with Pool(processes=os.cpu_count()) as pool:
         pool.starmap(load_airlines, [(file, duplicates, non_tweet_objects, error) for file in files])
 
-    #Comment this out if you don't want to update the database design.
-    #update_database_design(name_collection)
-
     return duplicates, non_tweet_objects, error
+
 
 def main():
     """
@@ -334,6 +233,6 @@ def main():
     print("Non-tweet objects:", len(non_tweet_objects))
     client.close()
 
+
 if __name__ == '__main__':
     main()
-
