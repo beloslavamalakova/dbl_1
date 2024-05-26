@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from pprint import pprint
 from timeit import default_timer as timer
 import pandas as pd
+import datetime
 
 # establish connection to MongoDB
 client = MongoClient()
@@ -105,8 +106,6 @@ def conversation(tweet):
     users = [tweet['user']['id'], tweet['in_reply_to_user_id']]
 
     conv_starter = recursive_up(tweet, users)
-    # fill value = 0 for response time of conversation starters
-    conv_starter['response_time'] = 0
 
     conv = [conv_starter]
 
@@ -155,8 +154,8 @@ def recursive_down(tweet, users, conv):
                                            projection)
 
     for r in recursive_tweets:
-        # response time of a reply tweet to the replied tweet
-        r['response_time'] = r['created_at_datetime'] - tweet['created_at_datetime']
+        # response time of a reply tweet to the replied tweet in minutes
+        r['response_time'] = (r['created_at_datetime'] - tweet['created_at_datetime']).total_seconds() / 60
         conv.append(r)
         recursive_down(r, users, conv)
 
@@ -343,7 +342,6 @@ start = timer()
 df_conversation.to_csv('conversations\klm_conversation.csv', sep=',', index=False, encoding='utf-8')
 end = timer()
 print(f'df_to_csv: {(end - start) / 60} minutes')
-
 
 #END TODO
 
