@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from pprint import pprint
-import matplotlib.pyplot as plt
+from timeit import default_timer as timer
 import pandas as pd
 
 # establish connection to MongoDB
@@ -18,6 +18,7 @@ db.tweets_collection.create_index('created_at_datetime')
 
 # START TODO
 
+
 # ADJUSTABLE VARIABLES
 
 # id of airline
@@ -29,7 +30,7 @@ projection = {'created_at_datetime': 1,
             'in_reply_to_status_id': 1,
             'in_reply_to_user_id': 1,
             'lang': 1,
-            'user.id': 1, 'user.name': 1}
+            'user.id': 1}
 
 # all reply tweets from airline
 klm_replies = db.tweets_collection.find({'user.id': klm_id,
@@ -39,9 +40,9 @@ klm_replies = db.tweets_collection.find({'user.id': klm_id,
                                 ).sort([('created_at_datetime',1)])
 
 # random tweet
-tweet = klm_replies[5]
+tweet = klm_replies[208]
 
-# finds all the tweets in a thread (may contain involve users)
+# finds all the tweets in a thread (may contain involve multiple users)
 def conversation_all(tweet):
     """
     Finds all the tweets in a thread (may involve multiple users).
@@ -77,7 +78,7 @@ def recursive_up_all(tweet):
 
 def recursive_down_all(tweet, conv_all):
     """
-    Starting from the conversation starter, the function recurs down until it finds all reply tweets
+    Starting from the conversation starter, the function recurs down until it finds all reply tweets.
     :param tweet: a tweet object
     :param conv_all: a list containing tweet objects
     :return: None.
@@ -104,6 +105,8 @@ def conversation(tweet):
     users = [tweet['user']['id'], tweet['in_reply_to_user_id']]
 
     conv_starter = recursive_up(tweet, users)
+    # fill value = 0 for response time of conversation starters
+    conv_starter['response_time'] = 0
 
     conv = [conv_starter]
 
@@ -136,7 +139,7 @@ def recursive_up(tweet, users):
 
 def recursive_down(tweet, users, conv):
     """
-    Starting from the conversation starter, the function recurs down until it finds all reply tweets
+    Starting from the conversation starter, the function recurs down until it finds all reply tweets.
     :param tweet: a tweet object
     :param users: a list containing an airline and one client
     :param conv: a list containing tweet objects
@@ -152,12 +155,14 @@ def recursive_down(tweet, users, conv):
                                            projection)
 
     for r in recursive_tweets:
+        # response time of a reply tweet to the replied tweet
+        r['response_time'] = r['created_at_datetime'] - tweet['created_at_datetime']
         conv.append(r)
         recursive_down(r, users, conv)
 
 
 # finds (multiple) conversations in a thread
-def find_conversations(tweet):
+def conversations(tweet):
     """
     Finds (multiple) conversations in a thread.
     :param df: a dataframe containing conversations
@@ -172,14 +177,14 @@ def find_conversations(tweet):
     conv_enders = []
     find_conversation_enders(conv_starter, users, conv_enders)
 
-    conversations = []
+    convs = []
 
     for e in conv_enders:
         conv = [e]
         find_conversation(e, users, conv)
-        conversations.append(conv)
+        convs.append(conv)
 
-    return conversations
+    return convs
 
 def find_conversation_starter(tweet, users):
     """
@@ -244,6 +249,60 @@ def find_conversation(tweet, users, conv):
         conv.insert(0, recursive_tweet)
         find_conversation(recursive_tweet, users, conv)
 
+def conversations_dataframe(replies):
+    """
+    Creates a dataframe containing conversation tweets. Uses the 'conversations' function.
+    :param replies: a list of reply tweets by an airline
+    :return: a dataframe containing conversation tweets.
+    """
+    # initialize empty dataframe
+    df_conversations = pd.DataFrame()
+
+    for tweet in replies:
+
+        # if tweet is already in database, ignore it
+        if not (df_conversations == tweet['_id']).any().any():
+            for conv in conversations(tweet):
+                df_temp = pd.DataFrame(conv)
+
+                # user is still stored in dictionary format
+                df_temp['user'] = df_temp['user'].apply(lambda x: pd.Series(x['id']))
+
+                # created for ease to group conversations
+                df_temp['conv_starter'] = conv[0]['_id']
+                df_temp['conv_ender'] = conv[-1]['_id']
+
+                df_conversations = pd.concat([df_conversations, df_temp], ignore_index=True)
+
+    return df_conversations
+
+def conversation_dateframe(replies):
+    """
+    Creates a dataframe containing conversation tweets. Uses the 'conversation' function.
+    :param replies: a list of reply tweets by an airline
+    :return: a dataframe containing conversation tweets.
+    """
+    # initialize empty dataframe
+    df_conversation = pd.DataFrame()
+
+    for tweet in klm_replies:
+        # if tweet is already in database, ignore it
+        if not (df_conversation == tweet['_id']).any().any():
+            conv = conversation(tweet)
+            df_temp = pd.DataFrame(conv)
+
+            # user is still stored in dictionary format
+            df_temp['user'] = df_temp['user'].apply(lambda x: pd.Series(x['id']))
+
+            # created for ease to group conversations
+            df_temp['conv_starter'] = conv[0]['_id']
+
+            df_conversation = pd.concat([df_conversation, df_temp], ignore_index=True)
+
+    return df_conversation
+
+
+# TESTING IN TERMINAL
 
 # for c in conversation_all(tweet):
 #     print(c['user']['id'])
@@ -251,64 +310,40 @@ def find_conversation(tweet, users, conv):
 #
 # print('end conversation all')
 #
-for c in conversation(tweet):
-    print(c['user']['id'])
-    pprint(c)
+# for c in conversation(tweet):
+#     pprint(c)
+#
+# print('end conversation')
+#
+# for c in conversations(tweet):
+#     pprint(c)
 
-print('end conversation')
 
-def conversations_dataframe(replies):
-    """
-    Creates a dataframe containing conversation tweets.
-    :param replies: a list of reply tweets by an airline
-    :return: a dataframe containing conversation tweets.
-    """
-    # initialize empty dataframe
-    df = pd.DataFrame()
-    count = 1
+# SAVE DATAFRAME TO CSV
 
-    for tweet in replies[:50]:
-        print(count)
-        count += 1
+# # dataframe containing conversation tweets (using conversations function)
+# start = timer()
+# df_conversations = conversations_dataframe(klm_replies)
+# end = timer()
+# print(f'create_df: {(end - start) / 60} minutes')
+#
+# start = timer()
+# df_conversations.to_csv('conversations\klm_conversations.csv', sep=',', index=False, encoding='utf-8')
+# end = timer()
+# print(f'df_to_csv: {(end - start) / 60} minutes')
 
-        # if tweet is already in database, ignore it
-        if not (df == tweet['_id']).any().any():
-            for conv in find_conversations(tweet):
-                df_temp = pd.DataFrame(conv)
 
-                df_temp['conv_starter'] = conv[0]['_id']
-                df_temp['conv_ender'] = conv[-1]['_id']
+# dataframe containing conversation tweets (using conversation function)
+start = timer()
+df_conversation = conversation_dateframe(klm_replies)
+end = timer()
+print(f'create_df: {(end - start) / 60} minutes')
 
-                df = pd.concat([df, df_temp], ignore_index=True)
+start = timer()
+df_conversation.to_csv('conversations\klm_conversation.csv', sep=',', index=False, encoding='utf-8')
+end = timer()
+print(f'df_to_csv: {(end - start) / 60} minutes')
 
-    return df
-
-def idk():
-    df = pd.DataFrame()
-    count=0
-    for tweet in klm_replies:
-        print(count)
-        count+=1
-        if not (df==tweet['_id']).any().any():
-            convo = conversation(tweet)
-            df_temp = pd.DataFrame(convo)
-
-            df = pd.concat([df, df_temp], ignore_index=True)
-    return df
-
-# print(df.head())
-
-# dataframe containing conversation tweets
-df_conversations = conversations_dataframe(klm_replies)
-
-# dataframe containing conversation tweets with a multi-index
-df_conversations_ind = df_conversations.set_index(['conv_starter', 'conv_ender', '_id'])
-
-print(df_conversations.info())
-print(df_conversations.head())
-
-print(df_conversations_ind.info())
-print(df_conversations_ind.head(10))
 
 #END TODO
 
