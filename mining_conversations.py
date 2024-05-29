@@ -299,8 +299,10 @@ def conversation_dateframe(replies):
     """
     # initialize empty dataframe
     df_conversation = pd.DataFrame()
-
+    count = 1
     for tweet in replies:
+        print(count)
+        count +=1
         # if tweet is already in database, ignore it
         if not (df_conversation == tweet['_id']).any().any():
             conv = conversation(tweet)
@@ -350,9 +352,9 @@ print(f'df_klm_to_csv: {(end - start) / 60} minutes')
 
 
 
-# get a random sample of 30 000 'others' reply tweets
-random.seed(3) # get same sample each time
-others_replies_sample = random.sample(list(others_replies), 30000)
+# get a random sample of 20 000 'others' reply tweets
+random.seed(1) # get same sample each time
+others_replies_sample = random.sample(list(others_replies), 20000)
 
 # dataframe containing 'others' conversation tweets (using conversation function)
 start = timer()
