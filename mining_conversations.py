@@ -299,10 +299,8 @@ def conversation_dateframe(replies):
     """
     # initialize empty dataframe
     df_conversation = pd.DataFrame()
-    count = 1
+
     for tweet in replies:
-        print(count)
-        count +=1
         # if tweet is already in database, ignore it
         if not (df_conversation == tweet['_id']).any().any():
             conv = conversation(tweet)
