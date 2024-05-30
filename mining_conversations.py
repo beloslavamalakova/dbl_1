@@ -30,38 +30,6 @@ airfrance_id = 106062176
 british_airways_id = 18332190
 lufthansa_id = 124476322
 
-# projected fields
-projection = {'created_at_datetime': 1,
-            'text': 1,
-            'in_reply_to_status_id': 1,
-            'in_reply_to_user_id': 1,
-            'lang': 1,
-            'user.id': 1}
-
-# all reply tweets from airline(s)
-klm_replies = db.tweets_collection.find({'user.id': klm_id,
-                                'in_reply_to_status_id': {'$ne': None},
-                                'in_reply_to_user_id': {'$ne': None}},
-                                projection
-                                ).sort([('created_at_datetime',1)])
-
-airfrance_replies = db.tweets_collection.find({'user.id': airfrance_id,
-                                'in_reply_to_status_id': {'$ne': None},
-                                'in_reply_to_user_id': {'$ne': None}},
-                                projection
-                                ).sort([('created_at_datetime',1)])
-
-british_airways_replies = db.tweets_collection.find({'user.id': british_airways_id,
-                                'in_reply_to_status_id': {'$ne': None},
-                                'in_reply_to_user_id': {'$ne': None}},
-                                projection
-                                ).sort([('created_at_datetime',1)])
-
-lufthansa_replies = db.tweets_collection.find({'user.id': lufthansa_id,
-                                'in_reply_to_status_id': {'$ne': None},
-                                'in_reply_to_user_id': {'$ne': None}},
-                                projection
-                                ).sort([('created_at_datetime',1)])
 
 # # random tweet
 # tweet = klm_replies[208]
