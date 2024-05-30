@@ -396,8 +396,10 @@ def non_reply_tweets_dataframe():
                   'lang':1,
                   'user':1}
 
-    # query for in_reply_to_status_id == None: only want single stand-alone tweets mentioning KLM that are not
-    # part of another conversation
+    # query for in_reply_to_status_id == None
+    """ Notably, there are many more tweets mentioning KLM that are already a reply to another tweet, whether it is to 
+    a post from KLM or from another user entirely. However, we place a priority for KLM to reply to those tweets that 
+    are solely directed at KLM. """
     klm_mention = db.tweets_collection.find({"entities.user_mentions.id": klm_id,
                                             'in_reply_to_status_id': None,
                                             'in_reply_to_user_id': {'$in': [None, klm_id]}},

@@ -133,7 +133,7 @@ def conversations_distribution():
     plt.ylabel('frequency', size=12)
     plt.title('Monthly distribution conversations', size=16, fontweight="bold")
     plt.annotate('2019', xy=(0.01,0.2), xycoords='axes fraction')
-    plt.annotate('2020', xy=(0.65,0.58), xycoords='axes fraction')
+    plt.annotate('2020', xy=(0.74,0.54), xycoords='axes fraction')
 
     # show plot
     plt.savefig("plots/conversation_distribution_monthly")
