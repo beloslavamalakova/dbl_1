@@ -325,10 +325,8 @@ def conversation_dateframe(airline_id):
 
     # initialize empty dataframe
     df_conversation = pd.DataFrame()
-    count = 1
+
     for tweet in airline_replies:
-        print(count)
-        count+=1
         # if tweet is already in database, ignore it
         if not (df_conversation == tweet['_id']).any().any():
             conv = conversation(tweet)
