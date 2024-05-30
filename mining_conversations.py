@@ -29,7 +29,6 @@ klm_id = 56377143
 airfrance_id = 106062176
 british_airways_id = 18332190
 lufthansa_id = 124476322
-others_id = [airfrance_id, british_airways_id, lufthansa_id]
 
 # projected fields
 projection = {'created_at_datetime': 1,
@@ -46,11 +45,23 @@ klm_replies = db.tweets_collection.find({'user.id': klm_id,
                                 projection
                                 ).sort([('created_at_datetime',1)])
 
-others_replies = db.tweets_collection.find({'user.id': {"$in": others_id},
-                                            'in_reply_to_status_id': {'$ne': None},
-                                            'in_reply_to_user_id': {'$ne': None}},
-                                           projection
-                                           ).sort([('created_at_datetime',1)])
+airfrance_replies = db.tweets_collection.find({'user.id': airfrance_id,
+                                'in_reply_to_status_id': {'$ne': None},
+                                'in_reply_to_user_id': {'$ne': None}},
+                                projection
+                                ).sort([('created_at_datetime',1)])
+
+british_airways_replies = db.tweets_collection.find({'user.id': british_airways_id,
+                                'in_reply_to_status_id': {'$ne': None},
+                                'in_reply_to_user_id': {'$ne': None}},
+                                projection
+                                ).sort([('created_at_datetime',1)])
+
+lufthansa_replies = db.tweets_collection.find({'user.id': lufthansa_id,
+                                'in_reply_to_status_id': {'$ne': None},
+                                'in_reply_to_user_id': {'$ne': None}},
+                                projection
+                                ).sort([('created_at_datetime',1)])
 
 # # random tweet
 # tweet = klm_replies[208]
@@ -291,16 +302,33 @@ def conversation(tweet):
 
     return conv
 
-def conversation_dateframe(replies):
+def conversation_dateframe(airline_id):
     """
     Creates a dataframe containing conversation tweets. Uses the 'conversation' function.
     :param replies: a list of reply tweets by an airline / airlines
     :return: a dataframe containing conversation tweets.
     """
+    # projected fields
+    projection = {'created_at_datetime': 1,
+                  'text': 1,
+                  'in_reply_to_status_id': 1,
+                  'in_reply_to_user_id': 1,
+                  'lang': 1,
+                  'user.id': 1}
+
+    # all reply tweets from airline
+    airline_replies = db.tweets_collection.find({'user.id': airline_id,
+                                                'in_reply_to_status_id': {'$ne': None},
+                                                'in_reply_to_user_id': {'$ne': None}},
+                                                projection
+                                                ).sort([('created_at_datetime', 1)])
+
     # initialize empty dataframe
     df_conversation = pd.DataFrame()
-
-    for tweet in replies:
+    count = 1
+    for tweet in airline_replies:
+        print(count)
+        count+=1
         # if tweet is already in database, ignore it
         if not (df_conversation == tweet['_id']).any().any():
             conv = conversation(tweet)
@@ -338,7 +366,7 @@ def conversation_dateframe(replies):
 
 # dataframe containing klm conversation tweets (using conversation function)
 start = timer()
-klm_conversation = conversation_dateframe(klm_replies)
+klm_conversation = conversation_dateframe(klm_id)
 end = timer()
 print(f'create_df_klm: {(end - start) / 60} minutes')
 
@@ -349,23 +377,43 @@ end = timer()
 print(f'df_klm_to_csv: {(end - start) / 60} minutes')
 
 
-
-# get a random sample of 20 000 'others' reply tweets
-random.seed(1) # get same sample each time
-others_replies_sample = random.sample(list(others_replies), 20000)
-
-# dataframe containing 'others' conversation tweets (using conversation function)
+# dataframe containing airfrance conversation tweets
 start = timer()
-others_conversation = conversation_dateframe(others_replies_sample)
+airfrance_conversation = conversation_dateframe(airfrance_id)
 end = timer()
-print(f'create_df_others: {(end - start) / 60} minutes')
+print(f'create_df_airfrance: {(end - start) / 60} minutes')
 
 # uploading dataframe to csv file
 start = timer()
-others_conversation.to_csv('conversations\others_sample_conversation.csv', sep=',', index=False, encoding='utf-8')
+airfrance_conversation.to_csv('conversations\\airfrance_conversation.csv', sep=',', index=False, encoding='utf-8')
 end = timer()
-print(f'df_others_to_csv: {(end - start) / 60} minutes')
+print(f'df_airfrance_to_csv: {(end - start) / 60} minutes')
 
+
+# dataframe containing british airways conversation tweets
+start = timer()
+british_airways_conversation = conversation_dateframe(british_airways_id)
+end = timer()
+print(f'create_df_british_airways: {(end - start) / 60} minutes')
+
+# uploading dataframe to csv file
+start = timer()
+british_airways_conversation.to_csv('conversations\\british_airways_conversation.csv', sep=',', index=False, encoding='utf-8')
+end = timer()
+print(f'df_british_airways_to_csv: {(end - start) / 60} minutes')
+
+
+# dataframe containing lufthansa conversation tweets
+start = timer()
+lufthansa_conversation = conversation_dateframe(lufthansa_id)
+end = timer()
+print(f'create_df_lufthansa: {(end - start) / 60} minutes')
+
+# uploading dataframe to csv file
+start = timer()
+lufthansa_conversation.to_csv('conversations\lufthansa_conversation.csv', sep=',', index=False, encoding='utf-8')
+end = timer()
+print(f'df_lufthansa_to_csv: {(end - start) / 60} minutes')
 
 
 

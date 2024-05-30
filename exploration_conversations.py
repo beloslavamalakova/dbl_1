@@ -95,7 +95,7 @@ response_time(klm_response_time)
 
 # average response time by klm in minutes
 klm_avg_response_time = klm_response_time.mean()
-# print(klm_avg_response_time) # result: 232.87321616800452
+# print(klm_avg_response_time) # result: 232.87321616800452 (or around
 
 # median response time by klm in minutes
 klm_med_response_time = klm_response_time.median()
