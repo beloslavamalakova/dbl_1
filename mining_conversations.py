@@ -330,56 +330,56 @@ def conversation_dateframe(airline_id):
 
 # MINING CONVERSATIONS
 
-# dataframe containing klm conversation tweets (using conversation function)
-start = timer()
-klm_conversation = conversation_dateframe(klm_id)
-end = timer()
-print(f'create_df_klm: {(end - start) / 60} minutes')
-
-# uploading dataframe to csv file
-start = timer()
-klm_conversation.to_csv('conversations\klm_conversation.csv', sep=',', index=False, encoding='utf-8')
-end = timer()
-print(f'df_klm_to_csv: {(end - start) / 60} minutes')
-
-
-# dataframe containing airfrance conversation tweets
-start = timer()
-airfrance_conversation = conversation_dateframe(airfrance_id)
-end = timer()
-print(f'create_df_airfrance: {(end - start) / 60} minutes')
-
-# uploading dataframe to csv file
-start = timer()
-airfrance_conversation.to_csv('conversations\\airfrance_conversation.csv', sep=',', index=False, encoding='utf-8')
-end = timer()
-print(f'df_airfrance_to_csv: {(end - start) / 60} minutes')
-
-
-# dataframe containing british airways conversation tweets
-start = timer()
-british_airways_conversation = conversation_dateframe(british_airways_id)
-end = timer()
-print(f'create_df_british_airways: {(end - start) / 60} minutes')
-
-# uploading dataframe to csv file
-start = timer()
-british_airways_conversation.to_csv('conversations\\british_airways_conversation.csv', sep=',', index=False, encoding='utf-8')
-end = timer()
-print(f'df_british_airways_to_csv: {(end - start) / 60} minutes')
-
-
-# dataframe containing lufthansa conversation tweets
-start = timer()
-lufthansa_conversation = conversation_dateframe(lufthansa_id)
-end = timer()
-print(f'create_df_lufthansa: {(end - start) / 60} minutes')
-
-# uploading dataframe to csv file
-start = timer()
-lufthansa_conversation.to_csv('conversations\lufthansa_conversation.csv', sep=',', index=False, encoding='utf-8')
-end = timer()
-print(f'df_lufthansa_to_csv: {(end - start) / 60} minutes')
+# # dataframe containing klm conversation tweets (using conversation function)
+# start = timer()
+# klm_conversation = conversation_dateframe(klm_id)
+# end = timer()
+# print(f'create_df_klm: {(end - start) / 60} minutes')
+#
+# # uploading dataframe to csv file
+# start = timer()
+# klm_conversation.to_csv('conversations\klm_conversation.csv', sep=',', index=False, encoding='utf-8')
+# end = timer()
+# print(f'df_klm_to_csv: {(end - start) / 60} minutes')
+#
+#
+# # dataframe containing airfrance conversation tweets
+# start = timer()
+# airfrance_conversation = conversation_dateframe(airfrance_id)
+# end = timer()
+# print(f'create_df_airfrance: {(end - start) / 60} minutes')
+#
+# # uploading dataframe to csv file
+# start = timer()
+# airfrance_conversation.to_csv('conversations\\airfrance_conversation.csv', sep=',', index=False, encoding='utf-8')
+# end = timer()
+# print(f'df_airfrance_to_csv: {(end - start) / 60} minutes')
+#
+#
+# # dataframe containing british airways conversation tweets
+# start = timer()
+# british_airways_conversation = conversation_dateframe(british_airways_id)
+# end = timer()
+# print(f'create_df_british_airways: {(end - start) / 60} minutes')
+#
+# # uploading dataframe to csv file
+# start = timer()
+# british_airways_conversation.to_csv('conversations\\british_airways_conversation.csv', sep=',', index=False, encoding='utf-8')
+# end = timer()
+# print(f'df_british_airways_to_csv: {(end - start) / 60} minutes')
+#
+#
+# # dataframe containing lufthansa conversation tweets
+# start = timer()
+# lufthansa_conversation = conversation_dateframe(lufthansa_id)
+# end = timer()
+# print(f'create_df_lufthansa: {(end - start) / 60} minutes')
+#
+# # uploading dataframe to csv file
+# start = timer()
+# lufthansa_conversation.to_csv('conversations\lufthansa_conversation.csv', sep=',', index=False, encoding='utf-8')
+# end = timer()
+# print(f'df_lufthansa_to_csv: {(end - start) / 60} minutes')
 
 
 
@@ -404,7 +404,14 @@ def non_reply_tweets_dataframe():
                                             projection).sort([('created_at_datetime', 1)])
 
     # create dataframe
-    df_non_reply = pd.DataFrame(klm_mention)
+    non_reply_tweets = []
+
+    for tweet in klm_mention:
+        # check if KLM has replied to this tweet
+        if db.tweets_collection.find_one({'user.id': klm_id, 'in_reply_to_status_id': tweet['_id']}) == None:
+            non_reply_tweets.append(tweet)
+
+    df_non_reply = pd.DataFrame(non_reply_tweets)
 
     # user is still stored in dictionary format
     df_non_reply['user'] = df_non_reply['user'].apply(lambda x: pd.Series(x['id']))
