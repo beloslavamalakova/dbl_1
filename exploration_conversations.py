@@ -10,15 +10,14 @@ klm_id = 56377143
 # dataframe of klm conversations
 df_klm_conv = pd.read_csv('conversations\klm_conversation.csv')
 df_klm_conv['created_at_datetime'] = pd.to_datetime(df_klm_conv['created_at_datetime'])
-print(df_klm_conv.info())
-print(df_klm_conv.head())
+# print(df_klm_conv.info())
+# print(df_klm_conv.head())
 
 # all tweets with the same conversation starter belong to one conversation
 df_klm_conv_group = df_klm_conv.groupby('conv_starter')
 
-# the number of conversations
-n_conversations = df_klm_conv_group.ngroups
-# print(n_conversations) # result: 21670
+# number of conversations
+# print(df_klm_conv_group.ngroups) # result: 21670
 
 # conversation length of each conversation
 l_conversations = df_klm_conv_group.size()
@@ -56,53 +55,70 @@ def conversation_length(l_conversations):
     plt.savefig("plots/conversation_length_top_10")
     plt.show()
 
-conversation_length(l_conversations)
+# conversation_length(l_conversations)
 
-# DECIDE WHAT TO DO WITH THIS
-# number of conversations of length 1
-n_length_1 = len(l_conversations[l_conversations == 1])
-# print(n_length_1) # result: 831
 
-# average length of conversations including of length 1
-avg_l_conversations = l_conversations.mean()
-# print(avg_l_conversations) # result: 3.295293031841255
 
-# average length of conversations excluding of length 1
-avg_l_conversations_excl = (l_conversations[l_conversations != 1]).mean()
-# print(avg_l_conversations_excl) # result: 3.386822784202697
 
-# series with response time of klm replies (INCLUDE MAX, MIN?)
+
+
+# after exploration, it was found that some conversations start with KLM !
+
+# filter conversations that only start with a client
+df_klm_conv = df_klm_conv.set_index(['conv_starter'], drop=False)
+klm_filter = df_klm_conv[(df_klm_conv['_id'] == df_klm_conv['conv_starter']) & (df_klm_conv['user'] == klm_id)]
+df_klm_conv.drop(klm_filter.index, inplace=True)
+df_klm_conv.reset_index(drop=True, inplace=True)
+# print(df_klm_conv)
+
+# group conversation by conversation starter
+df_klm_conv_group = df_klm_conv.groupby(['conv_starter'])
+
+# the number of conversations
+n_conversations = df_klm_conv_group.ngroups
+# print(n_conversations) # result: 20562
+
+# series with response time of klm replies
 klm_response_time = df_klm_conv[df_klm_conv['user'] == klm_id]['response_time']
+# print(klm_response_time)
 
 # histogram response time
-def response_time(klm_response_time):
+def response_time(response_time):
     # plot histogram
-    klm_response_time.hist(range=[0,200], color='blue')
+    response_time.hist(range=[0,200], color='blue')
 
     # adding labels and title
     plt.xlabel('response time (in minutes)', size=12)
     plt.ylabel('frequency', size=12)
-    plt.title('Response time KLM', size=16, fontweight="bold")
+    plt.title('Response time', size=16, fontweight="bold")
 
     # show plot
     plt.savefig("plots/response_time_klm")
     plt.show()
 
-response_time(klm_response_time)
+# response_time(klm_response_time)
+
+# percentage response time is within 30 min
+response_within_30_min = (len(klm_response_time[klm_response_time <= 30]) / len(klm_response_time)) * 100
+# print(response_within_30_min) # result: 73.3870720568854
+
+# percentage response time is within 1 hour
+response_within_1_hour = (len(klm_response_time[klm_response_time <= 60]) / len(klm_response_time)) * 100
+# print(response_within_1_hour) # result: 83.92435712753242
 
 # maximum response time
 # print(klm_response_time.max()) # result: 174565.5 (or around 4 months)
 
 # average response time by klm in minutes
 klm_avg_response_time = klm_response_time.mean()
-# print(klm_avg_response_time) # result: 232.87321616800452 (or around
+# print(klm_avg_response_time) # result: 233.1197244613357 (or around 4 hours)
 
 # median response time by klm in minutes
 klm_med_response_time = klm_response_time.median()
-# print(klm_med_response_time) # result: 14.716666666666669
+# print(klm_med_response_time) # result: 14.733333333333333
 
 # dataframe conversation starters by clients
-df_conv_starters = df_klm_conv[(df_klm_conv['_id'] == df_klm_conv['conv_starter']) & (df_klm_conv['user'] != klm_id)]
+df_conv_starters = df_klm_conv[(df_klm_conv['_id'] == df_klm_conv['conv_starter'])]
 
 def conversations_distribution():
     # conversations grouped by (week)day: bar chart
@@ -139,7 +155,7 @@ def conversations_distribution():
     plt.savefig("plots/conversation_distribution_monthly")
     plt.show()
 
-conversations_distribution()
+# conversations_distribution()
 
 # languages of conversation starters
 def conversation_languages():
@@ -159,8 +175,86 @@ def conversation_languages():
     plt.savefig("plots/conversation_languages")
     plt.show()
 
-conversation_languages()
+# conversation_languages()
 
+# repeat conversation length on filtered conversations
+l_conversations = df_klm_conv_group.size()
+# average conversation length
+# print(l_conversations.mean()) # result: 3.3860033070712965
+
+
+# STATISTICS KLM VS OTHER AIRLINES
+
+# id other airlines
+airfrance_id = 106062176
+british_airways_id = 18332190
+lufthansa_id = 124476322
+
+# dataframe of other airlines
+df_airfrance_conv = pd.read_csv('conversations\\airfrance_conversation.csv')
+df_british_airways_conv = pd.read_csv('conversations\\british_airways_conversation.csv')
+df_lufthansa_conv = pd.read_csv('conversations\lufthansa_conversation.csv')
+
+# filter conversations such that they only start with a client
+df_airfrance_conv = df_airfrance_conv.set_index(['conv_starter'], drop=False)
+airfrance_filter = df_airfrance_conv[(df_airfrance_conv['_id'] == df_airfrance_conv['conv_starter']) & (df_airfrance_conv['user'] == airfrance_id)]
+df_airfrance_conv.drop(airfrance_filter.index, inplace=True)
+df_airfrance_conv.reset_index(drop=True, inplace=True)
+
+df_british_airways_conv = df_british_airways_conv.set_index(['conv_starter'], drop=False)
+british_airways_filter = df_british_airways_conv[(df_british_airways_conv['_id'] == df_british_airways_conv['conv_starter']) & (df_british_airways_conv['user'] == british_airways_id)]
+df_british_airways_conv.drop(british_airways_filter.index, inplace=True)
+df_british_airways_conv.reset_index(drop=True, inplace=True)
+
+df_lufthansa_conv = df_lufthansa_conv.set_index(['conv_starter'], drop=False)
+lufthansa_filter = df_lufthansa_conv[(df_lufthansa_conv['_id'] == df_lufthansa_conv['conv_starter']) & (df_lufthansa_conv['user'] == lufthansa_id)]
+df_lufthansa_conv.drop(lufthansa_filter.index, inplace=True)
+df_lufthansa_conv.reset_index(drop=True, inplace=True)
+
+# group conversations by conversation starter
+df_airfrance_conv_group = df_airfrance_conv.groupby(['conv_starter'])
+df_british_airways_conv_group = df_british_airways_conv.groupby(['conv_starter'])
+df_lufthansa_conv_group = df_lufthansa_conv.groupby(['conv_starter'])
+
+# the number of conversations
+n_conversations_airfrance = df_airfrance_conv_group.ngroups
+# print(n_conversations_airfrance) # result: 5968
+n_conversations_british_airways = df_british_airways_conv_group.ngroups
+# print(n_conversations_british_airways) # result: 73427
+n_conversations_lufthansa = df_lufthansa_conv_group.ngroups
+# print(n_conversations_lufthansa) # result: 9028
+
+# conversation starters
+df_conv_starters_airfrance = df_airfrance_conv[df_airfrance_conv['_id'] == df_airfrance_conv['conv_starter']]
+df_conv_starters_british_airways = df_british_airways_conv[df_british_airways_conv['_id'] == df_british_airways_conv['conv_starter']]
+df_conv_starters_lufthansa = df_lufthansa_conv[df_lufthansa_conv['_id'] == df_lufthansa_conv['conv_starter']]
+
+# top languages of conversation starters
+languages_airfrance = df_conv_starters_airfrance.groupby('lang').size().sort_values(ascending=False)
+# print(languages_airfrance)
+languages_british_airways = df_conv_starters_british_airways.groupby('lang').size().sort_values(ascending=False)
+# print(languages_british_airways)
+languages_lufthansa = df_conv_starters_lufthansa.groupby('lang').size().sort_values(ascending=False)
+# print(languages_lufthansa)
+
+# comparison response times
+airfrance_response_time = df_airfrance_conv[df_airfrance_conv['user'] == airfrance_id]['response_time']
+# print(airfrance_response_time.mean()) # result: 385.7925550934034
+# print((len(airfrance_response_time[airfrance_response_time <= 60]) / len(airfrance_response_time)) * 100) # result: 57.57443082311734
+british_airways_response_time = df_british_airways_conv[df_british_airways_conv['user'] == british_airways_id]['response_time']
+# print(british_airways_response_time.mean()) # result: 679.3996913700634
+# print((len(airfrance_response_time[airfrance_response_time <= 60]) / len(airfrance_response_time)) * 100) # result: 39.93271574841541
+lufthansa_response_time = df_lufthansa_conv[df_lufthansa_conv['user'] == lufthansa_id]['response_time']
+# print(lufthansa_response_time.mean()) # result: 36.5021921265579
+# print((len(lufthansa_response_time[lufthansa_response_time <= 60]) / len(lufthansa_response_time)) * 100) # result: 92.81867145421903
+
+# comparison average conversation length
+l_conversations_airfrance = df_airfrance_conv_group.size()
+# print(l_conversations_airfrance.mean()) # result: 3.2027479892761392
+l_conversations_british_airways = df_british_airways_conv_group.size()
+# print(l_conversations_british_airways.mean()) # result: 3.093208220409386
+l_conversations_lufthansa = df_lufthansa_conv_group.size()
+# print(l_conversations_lufthansa.mean()) # result: 3.445945945945946
 
 
 
