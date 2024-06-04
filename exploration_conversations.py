@@ -263,3 +263,42 @@ l_conversations_lufthansa = df_lufthansa_conv_group.size()
 
 
 
+
+# ANALYSIS MULTI-LINGUAL SUPPORT
+
+# non-reply tweets directed at KLM
+df_non_reply = pd.read_csv('conversations\klm_non_reply_tweets.csv')
+
+# languages by count of klm conversation starters
+languages_klm = df_conv_starters.groupby('lang').size().sort_values(ascending=False)
+
+# languages by count of non_reply tweets directed at KLM
+languages_non_reply = df_non_reply.groupby('lang').size().sort_values(ascending=False)
+
+# I used these values to create a stacked bar chart in CANVA presentation by filling in the values manually
+# HOW: divide one element from top with the sum of the corresponding element in top and bottom (part / whole = %)
+top = languages_klm[['en', 'nl', 'es', 'pt', 'de', 'fr']]
+bottom = languages_non_reply[['en', 'nl', 'es', 'pt', 'de', 'fr']]
+
+top['other'] = languages_klm.drop(['en', 'nl', 'es', 'pt', 'de', 'fr']).sum()
+bottom['other'] = languages_non_reply.drop(['en', 'nl', 'es', 'pt', 'de', 'fr']).sum()
+
+# print(top)
+# print(bottom)
+
+
+# average response time main vs other languages
+response_time_en = df_klm_conv[(df_klm_conv['user'] == klm_id) & (df_klm_conv['lang'] == 'en')]['response_time']
+# print(response_time_en.mean()) # result: 240.73096441026559
+# print(response_time_en.median()) # result: 13.183333333333334
+# print((len(response_time_en[response_time_en <= 60]) / len(response_time_en)) * 100) # result: 85.30805687203792
+
+response_time_nl = df_klm_conv[(df_klm_conv['user'] == klm_id) & (df_klm_conv['lang'] == 'nl')]['response_time']
+# print(response_time_nl.mean()) # result: 138.39358695237004
+# print(response_time_nl.median()) # result: 17.766666666666666
+# print((len(response_time_nl[response_time_nl <= 60]) / len(response_time_nl)) * 100) # result: 83.60261258164317
+
+response_time_other = df_klm_conv[(df_klm_conv['user'] == klm_id) & ((df_klm_conv['lang'] != 'en') & (df_klm_conv['lang'] != 'nl'))]['response_time']
+# print(response_time_other.mean()) # result: 661.0480225988701
+# print(response_time_other.median()) # result: 29.958333333333332
+# print((len(response_time_other[response_time_other <= 60]) / len(response_time_other)) * 100) # result: 65.58018252933508
