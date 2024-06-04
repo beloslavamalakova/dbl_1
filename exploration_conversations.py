@@ -240,12 +240,17 @@ languages_lufthansa = df_conv_starters_lufthansa.groupby('lang').size().sort_val
 # comparison response times
 airfrance_response_time = df_airfrance_conv[df_airfrance_conv['user'] == airfrance_id]['response_time']
 # print(airfrance_response_time.mean()) # result: 385.7925550934034
+# print(airfrance_response_time.median()) # result: 42.425
 # print((len(airfrance_response_time[airfrance_response_time <= 60]) / len(airfrance_response_time)) * 100) # result: 57.57443082311734
+
 british_airways_response_time = df_british_airways_conv[df_british_airways_conv['user'] == british_airways_id]['response_time']
 # print(british_airways_response_time.mean()) # result: 679.3996913700634
+# print(british_airways_response_time.median()) # result: 124.23333333333332
 # print((len(airfrance_response_time[airfrance_response_time <= 60]) / len(airfrance_response_time)) * 100) # result: 39.93271574841541
+
 lufthansa_response_time = df_lufthansa_conv[df_lufthansa_conv['user'] == lufthansa_id]['response_time']
 # print(lufthansa_response_time.mean()) # result: 36.5021921265579
+# print(lufthansa_response_time.median()) # result: 7.1
 # print((len(lufthansa_response_time[lufthansa_response_time <= 60]) / len(lufthansa_response_time)) * 100) # result: 92.81867145421903
 
 # comparison average conversation length
