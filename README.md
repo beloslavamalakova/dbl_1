@@ -82,5 +82,5 @@ business idea will be handled in separate files that follow below.
 
 
 ### demo.py
-The demo file contains all the relevant plots. Simply run the file with no additional steps in order to view every 
-plot that was created. 
+The demo file contains all the relevant plots that will be used on the poster. Simply run the file with no additional 
+steps in order to view every plot that was created. 
