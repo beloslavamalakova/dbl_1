@@ -60,7 +60,9 @@ To execute the file, simply run the entire file with no additional steps.
 
 This python file mines the raw conversations for the following airlines: KLM, AirFrance, British Airways and Lufthansa. 
 The conversations are stored as csv files in the format (name of the airline)_conversations.csv
-in the "conversations" directory. 
+in the "conversations" directory. The time it takes to mine the conversations will be shown in the terminal for each 
+airline. For KLM, it should take within 10 minutes and even shorter for AirFrance and Lufthansa. However, the expected time for 
+British Airways is very high. 
 
 Furthermore, it also collects all single non-reply tweets directed at KLM, which are also stored in the "conversations"
 directory beneath the name of "klm_non_reply_tweets.csv".
