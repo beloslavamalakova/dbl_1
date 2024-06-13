@@ -25,9 +25,12 @@ Overview of the all directories and files in the main directory:
 - file: clean_data_final.py
 - file: mining_conversations.py
 - file: exploration_conversations.py
+- file: unadressed_high_follower_business_analysis.py
+- file: conversation_context_business.py
 - file: demo.py 
 
-## Order of Execution
+
+## Proposed Order of Execution
 ### load_data_final.py
 The first step is to load the data into a database. You will need to install **MongoDB** as the document database of
 choice with **MongoDB Compass** as GUI for querying, aggregating, and analyzing the MongoDB data in a visual 
@@ -37,18 +40,47 @@ The data needs to be stored under a specific name in a specific directory. That 
 airlines files need to be stored collectively in a folder named "data". Copy this folder over such that it is in 
 the same directory as load_data.py (main directory). 
 
-For any further instructions in order to load the data into the database, see the load_data.py file. 
+Then, the only thing that you need to do is run the entire file. 
 
 After the loading of the data, check MongoDB Compass to see whether there indeed exists a new database called 
 "airlines", which will have all the raw data stored in the "tweets_collection" collection. 
 
 
 ### exploration_data.py
+After the loading of the data, it is time to explore the raw data. In the file, you will find many subsections that are 
+marked by a comment, referring to what it explores. In order to execute that particular exploration, simply unmark the 
+line that will present the final result. Any plots that are created will automatically be stored to the "plots"
+directory. 
 
 ### clean_data_final.py
+xxx
 
 ### mining_conversations.py
+To execute the file, simply run the entire file with no additional steps. 
+
+This python file mines the raw conversations for the following airlines: KLM, AirFrance, British Airways and Lufthansa. 
+The conversations are stored as csv files in the format (name of the airline)_conversations.csv
+in the "conversations" directory. 
+
+Furthermore, it also collects all single non-reply tweets directed at KLM, which are also stored in the "conversations"
+directory beneath the name of "klm_non_reply_tweets.csv".
 
 ### exploration_conversations.py
+After the mining of the conversations, it is important to explore the various conversations and non-reply tweets 
+specific to KLM. Similar to the "data_explorations.py" file, the exploration is divided into smaller subsections. 
+In order to visualize the result, mark out the final line of execution that will produce the result. Any plots that 
+are created will be automatically stored to the "plots" directory. The exploration is basic, providing results on topics 
+such as conversation length, distribution and response rate per language. Any further complex exploration specific to the 
+business idea will be handled in separate files that follow below. 
+
+### unadressed_high_follower_business_analysis.py
+
+### conversation_context_business.py
+
 
 ### sentiment hhh
+
+
+### demo.py
+The demo file contains all the relevant plots. Simply run the file with no additional steps in order to view every 
+plot that was created. 
