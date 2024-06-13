@@ -35,6 +35,26 @@ def load_clean_conv(df_path, airline_id):
     print("DF cleaned")
     return df_conversations
 
+def load_clean_conv_trans(df_path, airline_id):
+    # load df conv
+    df_translated = pd.read_csv(df_path)
+    df_translated = df_translated.loc[df_translated["lang"] == "nl"]
+
+    # clean conv starting with airline / same but for Dutch
+    df_translated = df_translated.set_index(["conv_starter"], drop=False)
+    conv_filter = df_translated[
+        (df_translated["_id"] == df_translated["conv_starter"]) & (df_translated["user"] == airline_id)]
+    df_translated.drop(conv_filter.index, inplace=True)
+    df_translated = df_translated.reset_index(drop=True)
+
+    df_translated = df_translated.groupby('conv_starter').filter(lambda x: len(x) > 1)
+
+    # Apply cleaning function to the text column
+    df_translated['cleaned_text'] = df_translated['text'].apply(clean_tweet_text)
+    print("DF cleaned")
+    return df_translated
+
+
 # Function to get sentiment score
 def get_sentiment_score(text):
     return analyser.polarity_scores(text)['compound']
@@ -59,14 +79,14 @@ def sentiment_analysis(df_conversations):
 
 
 ############################################################# MAIN #####################################################
-repository_path = 'C:/Users/20221237/PycharmProjects/dbl_1/' # change this to your local path
+repository_path = 'C:/Users/' # change this to your local path
 
 # Configure SSL context to use certifis CA bundle
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 ssl._create_default_https_context = lambda: ssl_context
 
 # Download the vader_lexicon data
-#nltk.download('vader_lexicon')
+# nltk.download('vader_lexicon')
 
 analyser = SentimentIntensityAnalyzer()
 
@@ -91,3 +111,6 @@ df_conversations = df_conversations.loc[df_conversations["lang"] == "en"]
 df_conversations['cleaned_text'] = df_conversations['text'].apply(clean_tweet_text)
 df_conv_sentiment = sentiment_analysis(df_conversations)
 df_conv_sentiment.to_csv(repository_path + 'sentiment/klm_non_reply_sentiment.csv')
+
+df_translated = load_clean_conv_trans(repository_path + 'conversations/klm_conversation.csv', 56377143)
+df_translated.to_csv(repository_path + 'sentiment/klm_conv_translated.csv')
