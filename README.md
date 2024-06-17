@@ -1,13 +1,14 @@
 # DBL DATA CHALLENGE
 
 ## Packages
-In order to run the code, the following packages need to be installed: 
-- json 
+In order to run the code, the following packages were used:
 - pymongo 4.7.0
+- matplotlib 3.8.4
+- pandas 2.1.1
 - os 
 - datetime
+- json 
 - timeit
--
 
 ## Main Directory
 Overview of the all directories and files in the main directory:
