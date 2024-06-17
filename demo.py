@@ -40,11 +40,20 @@ languages_conv_starters = df_conv_starters.groupby('lang').size().sort_values(as
 languages_non_reply = df_non_reply.groupby('lang').size().sort_values(ascending=False)
 
 def distribution_languages(languages_conv_starters, languages_non_reply):
+    """
+    Creates a grouped bar chart with (1) the relative frequencies of languages in conversation starters and (2) the
+    relative frequencies of languages in single non-reply tweets directed at KLM.
+    :param languages_conv_starters: languages in conversations and their count
+    :param languages_non_reply: languages in non-reply tweets and their count
+    :return: None (the bar chart plot is saved to the 'plots' directory.
+    """
+    # distribution of English, Dutch and 'Other' languages in conversation starters
     select_languages_conv = languages_conv_starters[:2]
     select_languages_conv['other'] = languages_conv_starters[2:].sum()
     conv_total = select_languages_conv.sum()
     p_conv = select_languages_conv / conv_total
 
+    # distribution of English, Dutch and 'Other' languages in single non-reply tweets directed at KLM
     select_languages_non_reply = languages_non_reply[:2]
     select_languages_non_reply['other'] = languages_non_reply[2:].sum()
     non_reply_total = select_languages_non_reply.sum()
