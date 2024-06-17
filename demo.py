@@ -21,6 +21,7 @@ df_klm_conv = df_klm_conv[mask]
 # dataframe of non-reply tweets directed at KLM
 df_non_reply = pd.read_csv('conversations\klm_non_reply_tweets.csv')
 df_non_reply['created_at_datetime'] = pd.to_datetime(df_non_reply['created_at_datetime'])
+# limits entries to a specific period
 mask = (df_non_reply['created_at_datetime'] >= start_date) & (df_non_reply['created_at_datetime'] <= end_date)
 df_non_reply = df_non_reply[mask]
 
@@ -66,8 +67,7 @@ def distribution_languages(languages_conv_starters, languages_non_reply):
     select_languages.plot(kind='bar', color=['blue', 'orange'])
 
     # adding labels and title
-    plt.xlabel('language', size=12)
-    plt.ylabel('frequency', size=12)
+    plt.ylabel('relative frequency', size=12)
     plt.legend([f'single non-reply tweets (total: {non_reply_total})', f'conversation starter tweets (total: {conv_total})'])
     plt.title('Distribution of Languages', size=16, fontweight="bold")
 
