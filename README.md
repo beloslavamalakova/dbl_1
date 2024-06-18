@@ -21,9 +21,9 @@ Overview of the all directories and files in the main directory:
   - file: sentiment_analysis.ipynb
   - file: sentiment_analysis_DFs.py
   - file: translation_final.csv
-- file: load_data_final.py
+- file: load_data.py
 - file: exploration_data.py
-- file: clean_data_final.py
+- file: remove_retweets.py
 - file: mining_conversations.py
 - file: exploration_conversations.py
 - file: unadressed_high_follower_business_analysis.py
@@ -32,7 +32,7 @@ Overview of the all directories and files in the main directory:
 
 
 ## Proposed Order of Execution
-### load_data_final.py
+### load_data.py
 The first step is to load the data into a database. You will need to install **MongoDB** as the document database of
 choice with **MongoDB Compass** as GUI for querying, aggregating, and analyzing the MongoDB data in a visual 
 environment.
@@ -41,7 +41,8 @@ The data needs to be stored under a specific name in a specific directory. That 
 airlines files need to be stored collectively in a folder named "data". Copy this folder over such that it is in 
 the same directory as load_data.py (main directory). 
 
-Then, the only thing that you need to do is run the entire file. 
+Then, the only thing that you need to do is run the entire file. During the loading of the data, it immediately includes 
+only the selected attributes. 
 
 After the loading of the data, check MongoDB Compass to see whether there indeed exists a new database called 
 "airlines", which will have all the raw data stored in the "tweets_collection" collection. 
@@ -53,8 +54,9 @@ marked by a comment, referring to what it explores. In order to execute that par
 line that will present the final result. Any plots that are created will automatically be stored to the "plots"
 directory. 
 
-### clean_data_final.py
-xxx
+### remove_retweets.py
+This file removes retweets from the database. Simply run the file without any additional steps. In the end, it returns
+a count of the number of retweets that were removed. 
 
 ### mining_conversations.py
 To execute the file, simply run the entire file with no additional steps. 
