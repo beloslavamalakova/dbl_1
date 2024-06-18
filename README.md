@@ -61,6 +61,10 @@ a count of the number of retweets that were removed.
 ### mining_conversations.py
 To execute the file, simply run the entire file with no additional steps. 
 
+IMPORTANT: being tabbed out of the window that is running the code might break the connection with mongoDB. Which will 
+result in the code failing to run. So it is advised to not tab out while running this file. The expected running time of 
+this file is around 1.5h.
+
 This python file mines the raw conversations for the following airlines: KLM, AirFrance, British Airways and Lufthansa. 
 The conversations are stored as csv files in the format (name of the airline)_conversations.csv
 in the "conversations" directory. The time it takes to mine the conversations will be shown in the terminal for each 
