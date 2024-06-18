@@ -78,6 +78,14 @@ are created will be automatically stored to the "plots" directory. The explorati
 such as conversation length, distribution and response rate per language. Any further complex exploration specific to the 
 business idea will be handled in separate files that follow below. 
 
+### sentiment/translation_google_colab.ipynb
+This can ONLY be run in Google Colab. And can be run at any point after running sentiment/sentiment_analysis_DFs.py. 
+The only extra package that needs to be installed is dl-translate. The pip-install code for this is in the notebook. 
+This notebook takes the Dutch tweets from KLM's conversations, translates the Dutch text to English. And computes the 
+sentiment with VADER.
+In the notebook, the klm_conv_standard has to be uploaded. And when everything is done it will download the resulting 
+dataframe as "translation_final.csv". The notebook has extra instructions for all these steps.
+
 ### unadressed_high_follower_business_analysis.py
 To run this file you need to have pandas installed. 
 In the unadressed_high_follower_business_analyiss.py file, we determine basic row counts for starter tweets.
