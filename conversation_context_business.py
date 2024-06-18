@@ -12,31 +12,19 @@ nltk.download('stopwords') #Words to remove
 nltk.download('punkt') #Tokenization of text
 nltk.download('wordnet') #For lemmatizing
 
-# Things I want to do:
 """
 Find out the most common complaint word group from the negative sentiment KLM conversation starters.
 Find out the most common complaint word group from the negative sentiment KLM non-reply tweets.
-
 Find out which are the most common word group of positive sentiment conversation they are addressing.
 Find out which are the most common word groups of positive sentiment conversations of non-reply tweets
-
 Compare to the relevant airlines
-
 Find out the most common addressed conversation from all the other airlines.
-
 Further exploration:
-
 When were certain topics most relevant?
 Can we match events to topics?
-etc.
-
-
 """
 
-
 # CHANGE TO OWN PATH
-# IN THE FUTURE ALSO LOOK AT NON REPLY???
-
 file_paths = {
     'klm': {
             'conversations': ["D:\\Twitter Data CBL 1\\Github Repo\\dbl_1\\sentiment\\klm_conv_sentiment.csv"],
@@ -65,7 +53,7 @@ def adjust_text(text):
     2) convert to lowercase
     2) lemmatize words so put them in root form
     3) check if word is apphabetic
-    3) tokenize text. (advanced splitting)
+    4) tokenize text. (advanced splitting)
     filtering the custom stop words if they don't seem relevant in the final graphs.
 
     """
@@ -159,7 +147,7 @@ def fit_lda(matrix):
     LDA = LatentDirichletAllocation(
         n_components=10, #number of topics
         max_iter=200, #max num of iterations
-        learning_decay=0.9, #learning decay (for
+        learning_decay=0.9, #learning decay
         learning_offset=20,
         batch_size=256, # numer of documents to use for each iter
         random_state=42 #random seed reproducability
@@ -251,14 +239,12 @@ for airline, paths in file_paths.items():
     topics_positive = display_topics(LDA_Positive, vectorizer_positive.get_feature_names_out(), number_of_top_words)
     topics_neutral = display_topics(LDA_Neutral, vectorizer_neutral.get_feature_names_out(), number_of_top_words)
 
-
-    #WHAT IS TRANSFORM DOING?
+    #Apply the LDA model
     topic_assignments_negative = LDA_Negative.transform(matrix_negative)
     topic_assignments_positive = LDA_Positive.transform(matrix_positive)
     topic_assignments_neutral = LDA_Neutral.transform(matrix_neutral)
 
-
-    ### WHAT IS THIS TOPIC ASSIGNMENT ARGMAX DOING?
+    #MOST probable topics
     negative_conversations.loc[:, 'topic'] = topic_assignments_negative.argmax(axis=1)
     positive_conversations.loc[:, 'topic'] = topic_assignments_positive.argmax(axis=1)
     neutral_conversations.loc[:, 'topic'] = topic_assignments_neutral.argmax(axis=1)
@@ -287,20 +273,17 @@ if 'non_reply' in file_paths['klm']:
     vectorizer_positive_non_reply, matrix_positive_non_reply = vectorize_text(positive_non_reply['cleaned_text'])
     vectorizer_neutral_non_reply, matrix_neutral_non_reply = vectorize_text(neutral_non_reply['cleaned_text'])
 
-    lda_negative_non_reply = fit_lda(matrix_negative_non_reply)
-    lda_positive_non_reply = fit_lda(matrix_positive_non_reply)
-    lda_neutral_non_reply = fit_lda(matrix_neutral_non_reply)
+    LDA_negative_non_reply = fit_lda(matrix_negative_non_reply)
+    LDA_positive_non_reply = fit_lda(matrix_positive_non_reply)
+    LDA_neutral_non_reply = fit_lda(matrix_neutral_non_reply)
 
-    topics_negative_non_reply = display_topics(lda_negative_non_reply,
-                                               vectorizer_negative_non_reply.get_feature_names_out(), number_of_top_words)
-    topics_positive_non_reply = display_topics(lda_positive_non_reply,
-                                               vectorizer_positive_non_reply.get_feature_names_out(), number_of_top_words)
-    topics_neutral_non_reply = display_topics(lda_neutral_non_reply,
-                                              vectorizer_neutral_non_reply.get_feature_names_out(), number_of_top_words)
+    topics_negative_non_reply = display_topics(LDA_negative_non_reply, vectorizer_negative_non_reply.get_feature_names_out(), number_of_top_words)
+    topics_positive_non_reply = display_topics(LDA_positive_non_reply, vectorizer_positive_non_reply.get_feature_names_out(), number_of_top_words)
+    topics_neutral_non_reply = display_topics(LDA_neutral_non_reply, vectorizer_neutral_non_reply.get_feature_names_out(), number_of_top_words)
 
-    topic_assignments_negative_non_reply = lda_negative_non_reply.transform(matrix_negative_non_reply)
-    topic_assignments_positive_non_reply = lda_positive_non_reply.transform(matrix_positive_non_reply)
-    topic_assignments_neutral_non_reply = lda_neutral_non_reply.transform(matrix_neutral_non_reply)
+    topic_assignments_negative_non_reply = LDA_negative_non_reply.transform(matrix_negative_non_reply)
+    topic_assignments_positive_non_reply = LDA_positive_non_reply.transform(matrix_positive_non_reply)
+    topic_assignments_neutral_non_reply = LDA_neutral_non_reply.transform(matrix_neutral_non_reply)
 
     negative_non_reply.loc[:, 'topic'] = topic_assignments_negative_non_reply.argmax(axis=1)
     positive_non_reply.loc[:, 'topic'] = topic_assignments_positive_non_reply.argmax(axis=1)
