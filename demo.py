@@ -34,7 +34,7 @@ klm_filter = df_klm_conv[(df_klm_conv['_id'] == df_klm_conv['conv_starter']) & (
 df_klm_conv.drop(klm_filter.index, inplace=True)
 df_klm_conv.reset_index(drop=True, inplace=True)
 
-
+# load sentiment analysis on klm conversations
 klm_sentiment_df = pd.read_csv('sentiment/klm_conv_sentiment.csv')
 mask = (klm_sentiment_df['created_at_datetime'] >= start_date) & (klm_sentiment_df['created_at_datetime'] <= end_date)
 klm_sentiment_df = klm_sentiment_df[mask]
@@ -48,6 +48,15 @@ languages_conv_starters = df_conv_starters.groupby('lang').size().sort_values(as
 # languages by count of non_reply tweets directed at KLM
 languages_non_reply = df_non_reply.groupby('lang').size().sort_values(ascending=False)
 
+# Group by 'conv_starter'
+grouped = klm_sentiment_df.groupby('conv_starter')
+
+# Create an array of arrays for each conversation
+conversations_array = [
+    [[row['sentiment_score'], row['sentiment'], 'airline' if row['user'] == klm_id else 'customer']
+     for _, row in group.iterrows()]
+    for _, group in grouped
+]
 def distribution_languages(languages_conv_starters, languages_non_reply):
     """
     Creates a grouped bar chart with (1) the relative frequencies of languages in conversation starters and (2) the
@@ -85,16 +94,6 @@ def distribution_languages(languages_conv_starters, languages_non_reply):
 
 
 def sentiment_evolution(klm_sentiment_df):
-    # Group by 'conv_starter'
-    grouped = klm_sentiment_df.groupby('conv_starter')
-
-    # Create an array of arrays for each conversation
-    conversations_array = [
-        [[row['sentiment_score'], row['sentiment'], 'airline' if row['user'] == klm_id else 'customer']
-         for _, row in group.iterrows()]
-        for _, group in grouped
-    ]
-
     airline_conv_sentiment = []
 
     for i in range(0, len(conversations_array)):
@@ -149,5 +148,32 @@ def sentiment_evolution(klm_sentiment_df):
     plt.savefig("plots/sentiment_evolution")
     plt.show()
 
+def conversation_evolution(sample):
+    specific_conversation = conversations_array[sample]
+
+    # Extract sentiment scores and user types
+    sentiment_scores = [tweet[0] for tweet in specific_conversation]
+    sentiment = [tweet[1] for tweet in specific_conversation]
+    user_types = [tweet[2] for tweet in specific_conversation]
+
+    # Plot the sentiment scores as a line plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(sentiment_scores, marker='o', linestyle='-', color='b', label='Sentiment Score')
+
+    # Annotate each point with the user type
+    for i, (score, user) in enumerate(zip(sentiment_scores, user_types)):
+        plt.text(i, score, user, fontsize=12, ha='right', va='bottom')
+
+    plt.xlabel('Tweet')
+    plt.ylabel('Sentiment Score')
+    plt.title('Sentiment Scores of a Specific KLM Conversation')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("plots/conversation_evolution")
+    plt.show()
+
+
 distribution_languages(languages_conv_starters, languages_non_reply)
 sentiment_evolution(klm_sentiment_df)
+sample = 13
+conversation_evolution(sample)
