@@ -79,8 +79,33 @@ such as conversation length, distribution and response rate per language. Any fu
 business idea will be handled in separate files that follow below. 
 
 ### unadressed_high_follower_business_analysis.py
+To run this file you need to have pandas installed. 
+In the unadressed_high_follower_business_analyiss.py file, we determine basic row counts for starter tweets.
+Furthermore, we determine the number of conversation starters and starters not replied to for both influencers (> 10000 followers)
+and non-influencers.
 
 ### conversation_context_business.py
+
+Packages needed to run:
+
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+import matplotlib.pyplot as plt
+import textwrap
+nltk.download('stopwords')
+nltk.download('punkt') 
+nltk.download('wordnet')
+
+
+
+
+
+
 
 
 ### sentiment hhh
