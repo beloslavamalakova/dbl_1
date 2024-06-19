@@ -21,6 +21,12 @@ In order to run the code, the following packages were used:
 - nltk.download('stopwords')
 - nltk.download('punkt')
 - nltk.download('wordnet')
+- import ssl
+- import certifi
+- from nltk.sentiment.vader import SentimentIntensityAnalyzer
+- import pandas as pd
+- import matplotlib.pyplot as plt
+- import re
 
 ## Main Directory
 Overview of the all directories and files in the main directory:
