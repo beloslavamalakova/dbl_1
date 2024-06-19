@@ -61,6 +61,10 @@ a count of the number of retweets that were removed.
 ### mining_conversations.py
 To execute the file, simply run the entire file with no additional steps. 
 
+IMPORTANT: being tabbed out of the window that is running the code might break the connection with mongoDB. Which will 
+result in the code failing to run. So it is advised to not tab out while running this file. The expected running time of 
+this file is around 1.5h.
+
 This python file mines the raw conversations for the following airlines: KLM, AirFrance, British Airways and Lufthansa. 
 The conversations are stored as csv files in the format (name of the airline)_conversations.csv
 in the "conversations" directory. The time it takes to mine the conversations will be shown in the terminal for each 
@@ -77,6 +81,14 @@ In order to visualize the result, mark out the final line of execution that will
 are created will be automatically stored to the "plots" directory. The exploration is basic, providing results on topics 
 such as conversation length, distribution and response rate per language. Any further complex exploration specific to the 
 business idea will be handled in separate files that follow below. 
+
+### sentiment/translation_google_colab.ipynb
+This can ONLY be run in Google Colab. And can be run at any point after running sentiment/sentiment_analysis_DFs.py. 
+The only extra package that needs to be installed is dl-translate. The pip-install code for this is in the notebook. 
+This notebook takes the Dutch tweets from KLM's conversations, translates the Dutch text to English. And computes the 
+sentiment with VADER.
+In the notebook, the klm_conv_standard has to be uploaded. And when everything is done it will download the resulting 
+dataframe as "translation_final.csv". The notebook has extra instructions for all these steps.
 
 ### unadressed_high_follower_business_analysis.py
 To run this file you need to have pandas installed. 
@@ -109,6 +121,11 @@ nltk.download('wordnet')
 
 
 ### sentiment hhh
+
+
+### Testing of the results:
+We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
+The notebook for testing is Evaluation.ipynb
 
 
 ### demo.py
