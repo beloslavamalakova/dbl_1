@@ -9,6 +9,18 @@ In order to run the code, the following packages were used:
 - datetime
 - json 
 - timeit
+- import pandas as pd 
+- import nltk 
+- from nltk.corpus import stopwords 
+- from nltk.tokenize import word_tokenize 
+- from nltk.stem import WordNetLemmatizer 
+- from sklearn.feature_extraction.text import CountVectorizer 
+- from sklearn.decomposition import LatentDirichletAllocation 
+- import matplotlib.pyplot as plt
+- import textwrap 
+- nltk.download('stopwords')
+- nltk.download('punkt')
+- nltk.download('wordnet')
 
 ## Main Directory
 Overview of the all directories and files in the main directory:
@@ -97,27 +109,7 @@ Furthermore, we determine the number of conversation starters and starters not r
 and non-influencers.
 
 ### conversation_context_business.py
-
-Packages needed to run:
-
-import pandas as pd
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.decomposition import LatentDirichletAllocation
-import matplotlib.pyplot as plt
-import textwrap
-nltk.download('stopwords')
-nltk.download('punkt') 
-nltk.download('wordnet')
-
-
-
-
-
-
+This file has to be run.
 
 
 ### sentiment - sentiment_analysis_DFs.py
@@ -126,7 +118,9 @@ and the sentiment score of each tweet. Then, in "sentiment_analysis.ipynb" the s
 
 ### Testing of the results:
 We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
-The notebook for testing is Evaluation.ipynb
+
+The notebook for testing is Evaluation.ipynb. When you want to run the code you have to upload the specific file that you want to test: either eval_dataset_US_airlines.csv which is for testing on an already 
+labeled data for US airlines, and also the test_manual_evaluation.csv which contains the ~600 manually labeled tweets.
 
 
 ### demo.py
