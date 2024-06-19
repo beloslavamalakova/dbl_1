@@ -125,7 +125,7 @@ nltk.download('wordnet')
 
 ### Testing of the results:
 We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
-The notebook for testing is Manual_eval_sample.ipynb
+The notebook for testing is Evaluation.ipynb
 
 
 ### demo.py
