@@ -33,6 +33,8 @@ Overview of the all directories and files in the main directory:
   - file: sentiment_analysis.ipynb
   - file: sentiment_analysis_DFs.py
   - file: translation_final.csv
+  - file: test_manual_evaluation.csv
+  - file: eval_dataset_US_airlines.csv
 - file: load_data.py
 - file: exploration_data.py
 - file: remove_retweets.py
