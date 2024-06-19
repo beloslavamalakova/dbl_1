@@ -120,8 +120,9 @@ nltk.download('wordnet')
 
 
 
-### sentiment hhh
-
+### sentiment - sentiment_analysis_DFs.py
+This file runs sentiment analysis using Vader on KLM and its competitors, saving the sentiment (Positive/Neutral/Negative)
+and the sentiment score of each tweet. Then, in "sentiment_analysis.ipynb" the sentiment evolution of conversations is analyzed.
 
 ### Testing of the results:
 We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
