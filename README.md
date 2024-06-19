@@ -94,13 +94,7 @@ are created will be automatically stored to the "plots" directory. The explorati
 such as conversation length, distribution and response rate per language. Any further complex exploration specific to the 
 business idea will be handled in separate files that follow below. 
 
-### sentiment/translation_google_colab.ipynb
-This can ONLY be run in Google Colab. And can be run at any point after running sentiment/sentiment_analysis_DFs.py. 
-The only extra package that needs to be installed is dl-translate. The pip-install code for this is in the notebook. 
-This notebook takes the Dutch tweets from KLM's conversations, translates the Dutch text to English. And computes the 
-sentiment with VADER.
-In the notebook, the klm_conv_standard has to be uploaded. And when everything is done it will download the resulting 
-dataframe as "translation_final.csv". The notebook has extra instructions for all these steps.
+
 
 ### unadressed_high_follower_business_analysis.py
 To run this file you need to have pandas installed. 
@@ -115,6 +109,16 @@ This file has to be run.
 ### sentiment - sentiment_analysis_DFs.py
 This file runs sentiment analysis using Vader on KLM and its competitors, saving the sentiment (Positive/Neutral/Negative)
 and the sentiment score of each tweet. Then, in "sentiment_analysis.ipynb" the sentiment evolution of conversations is analyzed.
+
+
+### sentiment/translation_google_colab.ipynb
+This can ONLY be run in Google Colab. And can be run at any point after running sentiment/sentiment_analysis_DFs.py. 
+The only extra package that needs to be installed is dl-translate. The pip-install code for this is in the notebook. 
+This notebook takes the Dutch tweets from KLM's conversations, translates the Dutch text to English. And computes the 
+sentiment with VADER.
+In the notebook, the klm_conv_standard has to be uploaded. And when everything is done it will download the resulting 
+data frame as "translation_final.csv". The notebook has extra instructions for all these steps.
+
 
 ### Testing of the results:
 We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
