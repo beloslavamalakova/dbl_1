@@ -102,22 +102,9 @@ are created will be automatically stored to the "plots" directory. The explorati
 such as conversation length, distribution and response rate per language. Any further complex exploration specific to the 
 business idea will be handled in separate files that follow below. 
 
-
-
-### unadressed_high_follower_business_analysis.py
-To run this file you need to have pandas installed. 
-In the unadressed_high_follower_business_analyiss.py file, we determine basic row counts for starter tweets.
-Furthermore, we determine the number of conversation starters and starters not replied to for both influencers (> 10000 followers)
-and non-influencers.
-
-### conversation_context_business.py
-This file has to be run.
-
-
 ### sentiment - sentiment_analysis_DFs.py
 This file runs sentiment analysis using Vader on KLM and its competitors, saving the sentiment (Positive/Neutral/Negative)
 and the sentiment score of each tweet. Then, in "sentiment_analysis.ipynb" the sentiment evolution of conversations is analyzed.
-
 
 ### sentiment/translation_google_colab.ipynb
 This can ONLY be run in Google Colab. And can be run at any point after running sentiment/sentiment_analysis_DFs.py. 
@@ -127,6 +114,17 @@ sentiment with VADER.
 In the notebook, the klm_conv_standard has to be uploaded. And when everything is done it will download the resulting 
 data frame as "translation_final.csv". The notebook has extra instructions for all these steps.
 
+### unadressed_high_follower_business_analysis.py
+In the unadressed_high_follower_business_analyiss.py file, we determine basic row counts for starter tweets.
+Furthermore, we determine the number of conversation starters and starters not replied to for both influencers (> 10000 followers)
+and non-influencers.
+
+### conversation_context_business.py
+In the conversation_context_business we do topic modelling using Latent Dirichlet Allocation.
+This file will output 15 plots: positive, neutral, and negative sentiment topics for each airline and KLM nonreply tweets.
+It can only be run after the sentiment analysis file.
+To run the file install all relevant packages beforehand (sci-kit, nltk)
+The runtime of the model is dependent on the number of features in this case (10,000) it will run in around an hour depending on your system specs.
 
 ### Testing of the results:
 We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
