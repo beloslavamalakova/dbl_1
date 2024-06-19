@@ -123,6 +123,11 @@ nltk.download('wordnet')
 ### sentiment hhh
 
 
+### Testing of the results:
+We tested both with manually labeled data and with an already existing dataset on Kaggle: https://www.kaggle.com/datasets/crowdflower/twitter-airline-sentiment/data
+The notebook for testing is Manual_eval_sample.ipynb
+
+
 ### demo.py
 The demo file contains all the relevant plots that will be used on the poster. Simply run the file with no additional 
 steps in order to view every plot that was created. 
